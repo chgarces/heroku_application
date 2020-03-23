@@ -13,15 +13,6 @@ Base = declarative_base(engine)
 #     __table_args__ = {"autoload": True}
 
 
-# class ContactPointEmail(Base):
-#     __tablename__ = "salesforce.contactpointemail"
-#     __table_args__ = {"autoload": True}
-
-
-# class ContactPointPhone(Base):
-#     __tablename__ = "salesforce.contactpointphone"
-#     __table_args__ = {"autoload": True}
-
 
 class Individual(Base):
     __tablename__ = "salesforce.individual"
@@ -57,6 +48,16 @@ class ContactIdentifier(Base):
 class ContactSourceIdentifier(Base):
 
     __tablename__ = "salesforce.contact_source_identifier__c"
+    __table_args__ = {"autoload": True}
+
+
+class ContactPointEmail(Base):
+    __tablename__ = "salesforce.contactpointemail"
+    __table_args__ = {"autoload": True}
+
+
+class ContactPointPhone(Base):
+    __tablename__ = "salesforce.contactpointphone"
     __table_args__ = {"autoload": True}
 
 

@@ -110,6 +110,16 @@ def object_as_dict(obj):
     return {c.key: getattr(obj, c.key) for c in inspect(obj).mapper.column_attrs}
 
 
+def get_unique_id():
+    """-----------------------------------------------------------
+    Description: creates a unique id
+    Argument: 
+    Return: unique id
+    -----------------------------------------------------------"""
+    print("CHECK get_unique_id")
+    return uuid4().hex[:18]
+
+
 def is_empty(obj):
     """-----------------------------------------------------------
     Description: checks if field has values or is null/empty 
@@ -408,44 +418,6 @@ def create_dictionary_list(objects):
     return sc_id_dict
 
 
-def manage_create_records(session, stage_contacts):
-    """-----------------------------------------------------------
-    Description: Will manage the creation of all the contact related records  
-    Argument:(1)session (2)list of stage contacts
-    Return: 
-    -----------------------------------------------------------"""
-    print("CHECK manage_create_records")
-    sc_id_dict = create_dictionary(stage_contacts)
-    # Individual
-    ind_list = create_individual(sc_id_dict)
-    ind_dict = create_dictionary(ind_list)
-    add_objects_to_session(session, ind_list)
-    # Contact
-    cont_list = create_contact(sc_id_dict, ind_dict)
-    cont_dict = create_dictionary_list(cont_list)
-    add_objects_to_session(session, cont_list)
-    # ContactSource
-    cont_source_list = create_contact_source(sc_id_dict, cont_dict)
-    add_objects_to_session(session, cont_source_list)
-    # ContactIdentifier
-    cont_identifier_list = create_contact_identifier(sc_id_dict, cont_dict)
-    add_objects_to_session(session, cont_identifier_list)
-    # ContactSourceIdentifier
-    contact_source_dict = contact_source_dictionary(cont_source_list)
-    contact_identifier_dict = contact_identifier_dictionary(cont_identifier_list)
-    cont_sou_ident_list = create_contact_source_identifier(
-        contact_source_dict, contact_identifier_dict
-    )
-    add_objects_to_session(session, cont_sou_ident_list)
-    # ContactPoint
-
-    if session.new:
-        dml_stage_contact(session)
-        # update StageContacts status
-        add_objects_to_session(session, update_stage_contacts(stage_contacts))
-        dml_stage_contact(session)
-
-
 def create_contact_source_identifier(contact_source_dict, contact_identifier_dict):
     """-----------------------------------------------------------
     Description: Will create contact source identifier records
@@ -462,7 +434,7 @@ def create_contact_source_identifier(contact_source_dict, contact_identifier_dic
                 cid
             ).contact_source_id_ext__c
             cont_sou_ident_list.append(csi)
-
+            csi.contact_source_identifier_id_ext__c = get_unique_id()
     return cont_sou_ident_list
 
 
@@ -828,14 +800,124 @@ def add_objects_to_session(session, obj_list):
     return session
 
 
-def get_unique_id():
+def manage_create_records(session, stage_contacts):
     """-----------------------------------------------------------
-    Description: creates a unique id
-    Argument: 
-    Return: unique id
+    Description: Will manage the creation of all the contact related records  
+    Argument:(1)session (2)list of stage contacts
+    Return: 
     -----------------------------------------------------------"""
-    print("CHECK get_unique_id")
-    return uuid4().hex[:18]
+    print("CHECK manage_create_records")
+    sc_id_dict = create_dictionary(stage_contacts)
+    # Individual
+    ind_list = create_individual(sc_id_dict)
+    ind_dict = create_dictionary(ind_list)
+    add_objects_to_session(session, ind_list)
+    # Contact
+    cont_list = create_contact(sc_id_dict, ind_dict)
+    cont_dict = create_dictionary_list(cont_list)
+    add_objects_to_session(session, cont_list)
+    # ContactSource
+    cont_source_list = create_contact_source(sc_id_dict, cont_dict)
+    add_objects_to_session(session, cont_source_list)
+    # ContactIdentifier
+    cont_identifier_list = create_contact_identifier(sc_id_dict, cont_dict)
+    add_objects_to_session(session, cont_identifier_list)
+    # ContactSourceIdentifier
+    contact_source_dict = contact_source_dictionary(cont_source_list)
+    contact_identifier_dict = contact_identifier_dictionary(cont_identifier_list)
+    cont_sou_ident_list = create_contact_source_identifier(
+        contact_source_dict, contact_identifier_dict
+    )
+    add_objects_to_session(session, cont_sou_ident_list)
+    # ContactPoint
+    cont_point_list = create_contact_points(cont_identifier_list)
+    add_objects_to_session(session, cont_point_list)
+
+    if session.new:
+        dml_stage_contact(session)
+        # update StageContacts status
+        add_objects_to_session(session, update_stage_contacts(stage_contacts))
+        dml_stage_contact(session)
+
+
+def create_contact_points(cont_identifier_list):
+    """-----------------------------------------------------------
+    Description: Build the contact point objects
+    Argument: (1)list of contact identifiers (2)
+    Return: list of contact points
+    -----------------------------------------------------------"""
+    print("CHECK create_contact_points")
+    cont_point_list = []
+    cont_point_email_list = []
+    cont_point_phone_list = []
+    cont_point_mobile_list = []
+    for ci in cont_identifier_list:
+        if ci.identifier_group__c == "Email":
+            cont_point_email_list.append(ci)
+        if ci.identifier_group__c == "Mobile":
+            cont_point_mobile_list.append(ci)
+        if ci.identifier_group__c == "Phone":
+            cont_point_phone_list.append(ci)
+
+    if len(cont_point_email_list) > 0:
+        cont_point_list += create_contact_point_email(cont_point_email_list)
+    if len(cont_point_mobile_list) > 0:
+        cont_point_list += create_contact_point_mobile(cont_point_mobile_list)
+    if len(cont_point_phone_list) > 0:
+        cont_point_list += create_contact_point_phone(cont_point_phone_list)
+
+    return cont_point_list
+
+
+def create_contact_point_email(cont_identifier_list):
+    """-----------------------------------------------------------
+    Description: Build the contact point email objects
+    Argument: (1)list of email contact identifiers (2)
+    Return: list of contact point email
+    -----------------------------------------------------------"""
+    print("CHECK create_contact_point_email")
+
+    cont_point_email_list = []
+    for ci in cont_identifier_list:
+        cpe = ContactPointEmail()
+        cpe.contact_identifier_id_ext__c = ci.contact_identifier_id_ext__c
+        cpe.contact_point_email_id_ext__c = get_unique_id()
+        cont_point_email_list.append(cpe)
+    return cont_point_email_list
+
+
+def create_contact_point_phone(cont_identifier_list):
+    """-----------------------------------------------------------
+    Description: Build the contact point phone objects
+    Argument: (1)list of phone contact identifiers (2)
+    Return: list of contact point phone
+    -----------------------------------------------------------"""
+    print("CHECK create_contact_point_phone")
+
+    cont_point_phone_list = []
+    for ci in cont_identifier_list:
+        cpp = ContactPointPhone()
+        cpp.contact_identifier_id_ext__c = ci.contact_identifier_id_ext__c
+        cpp.contact_point_phone_id_ext__c = get_unique_id()
+        cont_point_phone_list.append(cpp)
+    return cont_point_phone_list
+
+
+def create_contact_point_mobile(cont_identifier_list):
+    """-----------------------------------------------------------
+    Description: Build the contact point mobile objects
+    Argument: (1)list or mobile contact identifiers (2)
+    Return: list of contact point mobile
+    -----------------------------------------------------------"""
+    print("CHECK create_contact_point_mobile")
+
+    cont_point_mobile_list = []
+    for ci in cont_identifier_list:
+        cpm = ContactPointPhone()
+        cpm.contact_identifier_id_ext__c = ci.contact_identifier_id_ext__c
+        cpm.contact_point_phone_id_ext__c = get_unique_id()
+        cont_point_mobile_list.append(cpm)
+    return cont_point_mobile_list
 
 
 if __name__ == "__main__":
