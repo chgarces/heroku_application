@@ -1,3 +1,4 @@
 {
-    "python.pythonPath": "/Users/chgarces/Workspace/hcms/.virtualenv_name/bin/python3"
+    "python.pythonPath": "/Users/chgarces/Workspace/hcms/.virtualenv_name/bin/python3",
+    "python.linting.enabled": true
 }

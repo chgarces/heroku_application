@@ -1,7 +1,105 @@
 from session_loader import *
 from uuid import uuid4
 
+# GENERIC
+def get_unique_id():
+    """-----------------------------------------------------------
+    Description: creates a unique id
+    Argument: 
+    Return: unique id
+    -----------------------------------------------------------"""
+    print("CHECK get_unique_id")
+    return uuid4().hex[:18]
 
+# GENERIC
+def is_empty(obj):
+    """-----------------------------------------------------------
+    Description: checks if field has values or is null/empty 
+    Argument: (1)object
+    Return: Boolean
+    -----------------------------------------------------------"""
+    if isinstance(obj, str):
+        if not (obj and not obj.isspace()):
+            return True
+        else:
+            return False
+    elif obj == None:
+        return True
+    else:
+        return False
+
+# GENERIC
+def add_objects_to_session(session, obj_list):
+    """-----------------------------------------------------------
+    Description: add object to session 
+    Argument: (1)session (2)list of objects
+    Return: session
+    -----------------------------------------------------------"""
+    print("CHECK add_objects_to_session")
+    for obj in obj_list:
+        session.add(obj)
+
+    return session
+
+# GENERIC
+def dml_stage_contact(session):
+    """-----------------------------------------------------------
+    Description: Manage DML operation in the database
+    Argument: db session
+    Return: 
+    -----------------------------------------------------------"""
+    print("CHECK dml_stage_contact")
+    try:
+        session.commit()
+        # TODO: CATCH ERRORS
+    except expression as identifier:
+        print("THERE WAS AN ERROR WHILE UPDATING STAGE CONTACTS")
+    finally:
+        session.close()
+
+# GENERIC
+def create_dictionary(objects):
+    """-----------------------------------------------------------
+    Description: Will create a dictionary with a list of objects
+    Argument:(1)list of objects
+    Return: dictionary with the [key]=stage_contact_id_ext__c [value]=obj
+    -----------------------------------------------------------"""
+    print("CHECK create_dictionary")
+    sc_id_dict = dict()
+    for obj in objects:
+        sc_id_dict[obj.stage_contact_id_ext__c] = obj
+    return sc_id_dict
+
+# GENERIC
+def create_dictionary_list(objects):
+    """-----------------------------------------------------------
+    Description: Will create a dictionary with a list of objects
+    Argument:(1)list of objects
+    Return: dictionary with the [key]=stage_contact_id_ext__c [value]=[obj]
+    -----------------------------------------------------------"""
+    print("CHECK create_dictionary")
+    sc_id_dict = dict()
+    for obj in objects:
+        if obj.stage_contact_id_ext__c in sc_id_dict.keys():
+            sc_id_dict.get(obj.stage_contact_id_ext__c).append(obj)
+        else:
+            sc_id_dict[obj.stage_contact_id_ext__c] = [obj]
+    return sc_id_dict
+
+# GENERIC 
+def update_stage_contacts(stage_contacts):
+    """-----------------------------------------------------------
+    Description: Will update the stage contacs status after the related record are created
+    Argument:(1)list of stage contacts
+    Return: return a list of stage contacts
+    -----------------------------------------------------------"""
+    stage_contact_list = []
+    for sc in stage_contacts:
+        sc.process_status__c = "POSTGRES COMPLETED"
+        stage_contact_list.append(sc)
+    return stage_contact_list
+
+# REQUIRED FIELDS
 def app_required_fields():
     """-----------------------------------------------------------  
     Description: This tuple determines the required fields for app
@@ -27,7 +125,7 @@ def app_required_fields():
     )
     return is_app_required_fields
 
-
+# REQUIRED FIELDS
 def dealer_required_fields():
     """-----------------------------------------------------------  
     Description: This tuple determines the required fields
@@ -60,7 +158,7 @@ def dealer_required_fields():
     )
     return is_dealer_required_fields
 
-
+# REQUIRED FIELDS
 def salesforce_org_required_fields():
     """-----------------------------------------------------------  
     Description: This tuple determines the required fields
@@ -86,7 +184,7 @@ def salesforce_org_required_fields():
     )
     return is_salesforce_org_required_fields
 
-
+# REQUIRED FIELDS
 def client_type_required_fields(stage_contact):
     """-----------------------------------------------------------
     Description: determine the required fields based on client type
@@ -100,7 +198,7 @@ def client_type_required_fields(stage_contact):
     elif stage_contact.is_salesforce_org__c == True:
         return salesforce_org_required_fields()
 
-
+# REQUIRED FIELDS
 def object_as_dict(obj):
     """-----------------------------------------------------------
     Description: convert an object into a DICT
@@ -109,34 +207,7 @@ def object_as_dict(obj):
     -----------------------------------------------------------"""
     return {c.key: getattr(obj, c.key) for c in inspect(obj).mapper.column_attrs}
 
-
-def get_unique_id():
-    """-----------------------------------------------------------
-    Description: creates a unique id
-    Argument: 
-    Return: unique id
-    -----------------------------------------------------------"""
-    print("CHECK get_unique_id")
-    return uuid4().hex[:18]
-
-
-def is_empty(obj):
-    """-----------------------------------------------------------
-    Description: checks if field has values or is null/empty 
-    Argument: (1)object
-    Return: Boolean
-    -----------------------------------------------------------"""
-    if isinstance(obj, str):
-        if not (obj and not obj.isspace()):
-            return True
-        else:
-            return False
-    elif obj == None:
-        return True
-    else:
-        return False
-
-
+# REQUIRED FIELDS
 def required_field_validator(session, obj):
     """-----------------------------------------------------------
     Description: will validate required fields from a given object
@@ -154,7 +225,7 @@ def required_field_validator(session, obj):
         rfv["ERROR_FIELDS"] = required_errors
     return rfv
 
-
+# REQUIRED FIELDS
 def validate_email_fields(session, stage_contacts):
     """-----------------------------------------------------------  
     Description: if changed email is true old_email is required
@@ -172,7 +243,7 @@ def validate_email_fields(session, stage_contacts):
     if session.dirty:
         dml_stage_contact(session)
 
-
+# REQUIRED FIELDS
 def validate_mobile_fields(session, stage_contacts):
     """-----------------------------------------------------------  
     Description: if mobile phone is provided sms consent and date are required
@@ -195,7 +266,7 @@ def validate_mobile_fields(session, stage_contacts):
     if session.dirty:
         dml_stage_contact(session)
 
-
+# REQUIRED FIELDS
 def validate_required_fields(session, stage_contacts):
     """-----------------------------------------------------------  
     Description:  validate required fields
@@ -219,56 +290,7 @@ def validate_required_fields(session, stage_contacts):
     if session.dirty:
         dml_stage_contact(session)
 
-
-def group_contacts_by_client_type(session):
-    """-----------------------------------------------------------
-    Description: DO NOT KNOW IF WE ARE USING THIS ONE 
-    Argument: 
-    Return: 
-    -----------------------------------------------------------"""
-    print("CHECK group_contacts_by_client_type")
-    all_stage_contacts = (
-        session.query(StageContact)
-        .filter(
-            StageContact.process_status__c == "ORG SOURCE",
-            StageContact.status__c == "IN PROGRESS",
-        )
-        .limit(100)
-    )
-    contact_type_dict = dict()
-    for sc in all_stage_contacts:
-        if sc.is_app__c == True:
-            sc.process_status__c = "CLIENT GROUPING"
-            if "APP" in contact_type_dict.keys():
-                contact_type_dict.get("APP").extend(sc)
-            else:
-                contact_type_dict["APP"] = [sc]
-            session.add(sc)
-
-        elif sc.is_dealer__c == True:
-            sc.process_status__c = "CLIENT GROUPING"
-            if "DEALER" in contact_type_dict.keys():
-                contact_type_dict.get("DEALER").extend(sc)
-            else:
-                contact_type_dict["DEALER"] = [sc]
-            session.add(sc)
-
-        elif sc.is_salesforce_org__c == True:
-            sc.process_status__c = "CLIENT GROUPING"
-            if "SALESFORCE_ORG" in contact_type_dict.keys():
-                contact_type_dict.get("SALESFORCE_ORG").extend(sc)
-            else:
-                contact_type_dict["SALESFORCE_ORG"] = [sc]
-            session.add(sc)
-        else:
-            sc.process_status__c = "CLIENT GROUPING"
-            sc.status__c = "FAILED"
-            sc.error_message__c = "CLIENT DOES NOT HAVE A CLIENT TYPE IDENTIFIED"
-            session.add(sc)
-    if session.dirty:
-        dml_stage_contact(session)
-
-
+# ORG SOURCE UPDATE
 def update_stage_contact_with_org_source(session, stage_contacts, org_dict):
     """-----------------------------------------------------------
     Description: Update each stage contact with the organization source table attributes for processing
@@ -314,7 +336,7 @@ def update_stage_contact_with_org_source(session, stage_contacts, org_dict):
     if session.dirty:
         dml_stage_contact(session)
 
-
+# ORG SOURCE UPDATE
 def query_stage_contacts(session, query_limit, **kwargs):
     """-----------------------------------------------------------
     Description: Will query all of the records from the StageContact table 
@@ -336,7 +358,7 @@ def query_stage_contacts(session, query_limit, **kwargs):
     #     print("CHECK SC {}".format(sc.process_status__c))
     return stage_contacts
 
-
+# ORG SOURCE UPDATE
 def query_organization_source(session, query_limit, **kwargs):
     """-----------------------------------------------------------
     Description: Will query all of the records from the OrganizationSource table 
@@ -358,7 +380,7 @@ def query_organization_source(session, query_limit, **kwargs):
     #     print("CHECK ORG {}".format(org.client_id__c))
     return organization_sources
 
-
+# ORG SOURCE UPDATE
 def organization_source_dictionary(organization_sources):
     """-----------------------------------------------------------
     Description: create a dictionary with org sources
@@ -372,52 +394,7 @@ def organization_source_dictionary(organization_sources):
         org_dict[org.client_id__c] = org
     return org_dict
 
-
-def dml_stage_contact(session):
-    """-----------------------------------------------------------
-    Description: Manage DML operation in the database
-    Argument: db session
-    Return: 
-    -----------------------------------------------------------"""
-    print("CHECK dml_stage_contact")
-    try:
-        session.commit()
-        # TODO: CATCH ERRORS
-    except expression as identifier:
-        print("THERE WAS AN ERROR WHILE UPDATING STAGE CONTACTS")
-    finally:
-        session.close()
-
-
-def create_dictionary(objects):
-    """-----------------------------------------------------------
-    Description: Will create a dictionary with a list of objects
-    Argument:(1)list of objects
-    Return: dictionary with the [key]=stage_contact_id_ext__c [value]=obj
-    -----------------------------------------------------------"""
-    print("CHECK create_dictionary")
-    sc_id_dict = dict()
-    for obj in objects:
-        sc_id_dict[obj.stage_contact_id_ext__c] = obj
-    return sc_id_dict
-
-
-def create_dictionary_list(objects):
-    """-----------------------------------------------------------
-    Description: Will create a dictionary with a list of objects
-    Argument:(1)list of objects
-    Return: dictionary with the [key]=stage_contact_id_ext__c [value]=[obj]
-    -----------------------------------------------------------"""
-    print("CHECK create_dictionary")
-    sc_id_dict = dict()
-    for obj in objects:
-        if obj.stage_contact_id_ext__c in sc_id_dict.keys():
-            sc_id_dict.get(obj.stage_contact_id_ext__c).append(obj)
-        else:
-            sc_id_dict[obj.stage_contact_id_ext__c] = [obj]
-    return sc_id_dict
-
-
+# CREATION CONTACT SOURCE IDENTIFIER
 def create_contact_source_identifier(contact_source_dict, contact_identifier_dict):
     """-----------------------------------------------------------
     Description: Will create contact source identifier records
@@ -437,7 +414,7 @@ def create_contact_source_identifier(contact_source_dict, contact_identifier_dic
             csi.contact_source_identifier_id_ext__c = get_unique_id()
     return cont_sou_ident_list
 
-
+# CREATION CONTACT SOURCE IDENTIFIER
 def contact_identifier_dictionary(cont_identifier_list):
     """-----------------------------------------------------------
     Description: Will create a dictionary with a list of objects
@@ -453,7 +430,7 @@ def contact_identifier_dictionary(cont_identifier_list):
             contact_identifier_dict[ci.contact_id_ext__c] = [ci]
     return contact_identifier_dict
 
-
+# CREATION CONTACT SOURCE IDENTIFIER
 def contact_source_dictionary(cont_source_list):
     """-----------------------------------------------------------
     Description: Will create a dictionary with a list of objects
@@ -467,19 +444,7 @@ def contact_source_dictionary(cont_source_list):
     return contact_source_dict
 
 
-def update_stage_contacts(stage_contacts):
-    """-----------------------------------------------------------
-    Description: Will update the stage contacs status after the related record are created
-    Argument:(1)list of stage contacts
-    Return: return a list of stage contacts
-    -----------------------------------------------------------"""
-    stage_contact_list = []
-    for sc in stage_contacts:
-        sc.process_status__c = "POSTGRES COMPLETED"
-        stage_contact_list.append(sc)
-    return stage_contact_list
-
-
+# CREATION INDIVIDUAL
 def create_individual(sc_id_dict):
     """-----------------------------------------------------------
     Description: creates individual objects
@@ -495,7 +460,7 @@ def create_individual(sc_id_dict):
             ind_list.append(generic_individual(sc_id_dict.get(k)))
     return ind_list
 
-
+# CREATION INDIVIDUAL
 def generic_individual(stage_contact):
     ind = Individual()
     ind.firstname = stage_contact.first_name__c
@@ -505,7 +470,7 @@ def generic_individual(stage_contact):
 
     return ind
 
-
+# CREATION INDIVIDUAL
 def obfuscated_individual(stage_contact):
     ind = Individual()
     ind.firstname = stage_contact.source_name__c + "FirstName"
@@ -515,7 +480,7 @@ def obfuscated_individual(stage_contact):
 
     return ind
 
-
+# CREATION CONTACT
 def create_contact(sc_id_dict, ind_dict):
     """-----------------------------------------------------------
     Description: creates contact objects
@@ -541,7 +506,7 @@ def create_contact(sc_id_dict, ind_dict):
             )
     return cont_list
 
-
+# CREATION CONTACT
 def generic_contact(stage_contact, ind_id):
     """-----------------------------------------------------------
     Description: build contact objects :: Caterpillar/MA General 
@@ -558,7 +523,7 @@ def generic_contact(stage_contact, ind_id):
     c.stage_contact_id_ext__c = stage_contact.stage_contact_id_ext__c
     return c
 
-
+# CREATION CONTACT
 def source_contact(stage_contact, ind_id):
     """-----------------------------------------------------------
     Description: build source contact objects :: This is the client type contact (Solar, CatFi)
@@ -575,7 +540,7 @@ def source_contact(stage_contact, ind_id):
     c.stage_contact_id_ext__c = stage_contact.stage_contact_id_ext__c
     return c
 
-
+# CREATION CONTACT
 def obfuscated_contact(stage_contact, ind_id):
     """-----------------------------------------------------------
     Description: build obfustaced source contact objects 
@@ -598,7 +563,7 @@ def obfuscated_contact(stage_contact, ind_id):
     c.stage_contact_id_ext__c = stage_contact.stage_contact_id_ext__c
     return c
 
-
+# CREATION CONTACT SOURCE
 def create_contact_source(sc_id_dict, cont_dict):
     """-----------------------------------------------------------
     Description: creates contact source objects
@@ -619,7 +584,7 @@ def create_contact_source(sc_id_dict, cont_dict):
             cont_source_list.append(cs)
     return cont_source_list
 
-
+# CREATION CONTACT IDENTIFIER
 def create_contact_identifier(sc_id_dict, cont_dict):
     """-----------------------------------------------------------
     Description: creates contact identifier objects
@@ -666,7 +631,7 @@ def create_contact_identifier(sc_id_dict, cont_dict):
 
     return cont_ident_list
 
-
+# CREATION CONTACT IDENTIFIER
 def master_identifier(stage_contact, cont_id):
     """-----------------------------------------------------------
     Description: creates Salesforce Id contact identifier object
@@ -682,7 +647,7 @@ def master_identifier(stage_contact, cont_id):
     ci.stage_contact_id_ext__c = stage_contact.stage_contact_id_ext__c
     return ci
 
-
+# CREATION CONTACT IDENTIFIER
 def source_id_identifier(stage_contact, cont_id):
     """-----------------------------------------------------------
     Description: creates Source Id contact identifier object
@@ -699,7 +664,7 @@ def source_id_identifier(stage_contact, cont_id):
     ci.stage_contact_id_ext__c = stage_contact.stage_contact_id_ext__c
     return ci
 
-
+# CREATION CONTACT IDENTIFIER
 def phone_identifier(stage_contact, cont_id):
     """-----------------------------------------------------------
     Description: creates Phone contact identifier object
@@ -716,7 +681,7 @@ def phone_identifier(stage_contact, cont_id):
     ci.stage_contact_id_ext__c = stage_contact.stage_contact_id_ext__c
     return ci
 
-
+# CREATION CONTACT IDENTIFIER
 def mobile_identifier(stage_contact, cont_id):
     """-----------------------------------------------------------
     Description: creates Mobile contact identifier object
@@ -733,7 +698,7 @@ def mobile_identifier(stage_contact, cont_id):
     ci.stage_contact_id_ext__c = stage_contact.stage_contact_id_ext__c
     return ci
 
-
+# CREATION CONTACT IDENTIFIER
 def email_identifier(stage_contact, cont_id):
     """-----------------------------------------------------------
     Description: creates Email contact identifier object
@@ -750,7 +715,7 @@ def email_identifier(stage_contact, cont_id):
     ci.stage_contact_id_ext__c = stage_contact.stage_contact_id_ext__c
     return ci
 
-
+# CREATION CONTACT IDENTIFIER
 def dealer_code_identifier(stage_contact, cont_id):
     """-----------------------------------------------------------
     Description: creates Email contact identifier object
@@ -767,7 +732,7 @@ def dealer_code_identifier(stage_contact, cont_id):
     ci.stage_contact_id_ext__c = stage_contact.stage_contact_id_ext__c
     return ci
 
-
+# CREATION CONTACT IDENTIFIER
 def dealer_customer_number_identifier(stage_contact, cont_id):
     """-----------------------------------------------------------
     Description: creates Email contact identifier object
@@ -787,19 +752,8 @@ def dealer_customer_number_identifier(stage_contact, cont_id):
     return ci
 
 
-def add_objects_to_session(session, obj_list):
-    """-----------------------------------------------------------
-    Description: add object to session 
-    Argument: (1)session (2)list of objects
-    Return: session
-    -----------------------------------------------------------"""
-    print("CHECK add_objects_to_session")
-    for obj in obj_list:
-        session.add(obj)
 
-    return session
-
-
+# CREATION
 def manage_create_records(session, stage_contacts):
     """-----------------------------------------------------------
     Description: Will manage the creation of all the contact related records  
@@ -833,13 +787,42 @@ def manage_create_records(session, stage_contacts):
     cont_point_list = create_contact_points(cont_identifier_list)
     add_objects_to_session(session, cont_point_list)
 
-    if session.new:
+    if session.new:  
         dml_stage_contact(session)
         # update StageContacts status
         add_objects_to_session(session, update_stage_contacts(stage_contacts))
         dml_stage_contact(session)
 
+# CREATION CONTACT POINT CONSENT
+def create_contact_consent_dictionary(cont_point_list):
+    """-----------------------------------------------------------
+    Description: Will create a dictionary with a list of objects
+    Argument:(1)list of cont_source_list
+    Return: dictionary with the [key]=stage_contact_id_ext__c [value]=object 
+    -----------------------------------------------------------"""
+    print("CHECK create_contact_consent_dictionary")
+    cont_point_con_dict = dict()
+    for cp in cont_source_list:
+        cont_point_list[cs.stage_contact_id_ext__c] = cp
+    return cont_point_con_dict 
 
+# CREATION CONTACT POINT CONSENT
+def create_contact_consent(cont_point_con_dict, sc_id_dict ):
+    """-----------------------------------------------------------
+    Description: Will create a dictionary with a list of objects
+    Argument:(1)list of cont_source_list
+    Return: dictionary with the [key]=stage_contact_id_ext__c [value]=object 
+    -----------------------------------------------------------"""
+    cont_consent_list = []
+    cpc = ContactPointConsent()
+
+    cpc.contact_point_consent_id_ext__c = get_unique_id()
+    cpc.stage_contact_id_ext__c = 
+    cpc.individual_id_ext__c = 
+    cont_consent_list.append()  
+    return cont_consent_list  
+
+# CREATION CONTACT POINT 
 def create_contact_points(cont_identifier_list):
     """-----------------------------------------------------------
     Description: Build the contact point objects
@@ -868,7 +851,7 @@ def create_contact_points(cont_identifier_list):
 
     return cont_point_list
 
-
+# CREATION CONTACT POINT 
 def create_contact_point_email(cont_identifier_list):
     """-----------------------------------------------------------
     Description: Build the contact point email objects
@@ -885,7 +868,7 @@ def create_contact_point_email(cont_identifier_list):
         cont_point_email_list.append(cpe)
     return cont_point_email_list
 
-
+# CREATION CONTACT POINT 
 def create_contact_point_phone(cont_identifier_list):
     """-----------------------------------------------------------
     Description: Build the contact point phone objects
@@ -902,7 +885,7 @@ def create_contact_point_phone(cont_identifier_list):
         cont_point_phone_list.append(cpp)
     return cont_point_phone_list
 
-
+# CREATION CONTACT POINT 
 def create_contact_point_mobile(cont_identifier_list):
     """-----------------------------------------------------------
     Description: Build the contact point mobile objects

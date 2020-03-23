@@ -353,7 +353,7 @@ class ContactPointPhone(Base):
     telephonenumber = Column(String(40))
 
 
-class contactPointConsent(Base):
+class ContactPointConsent(Base):
     __tablename__ = "salesforce.contactpointconsent"
 
     id = Column(Integer, primary_key=True)
@@ -396,7 +396,7 @@ if __name__ == "__main__":
     # Base.metadata.drop_all(bind=engine, tables=[ContactSourceIdentifier.__table__])
     # Base.metadata.drop_all(bind=engine, tables=[ContactPointEmail.__table__])
     # Base.metadata.drop_all(bind=engine, tables=[ContactPointPhone.__table__])
-    # Base.metadata.drop_all(bind=engine, tables=[contactPointConsent.__table__])
+    # Base.metadata.drop_all(bind=engine, tables=[ContactPointConsent.__table__])
     Base.metadata.create_all(bind=engine)
 
     # Base.metadata.drop_all(bind=engine, tables=[OrganizationSource.__table__])
