@@ -269,8 +269,8 @@ def update_stage_contact_with_org_source(session, stage_contacts, org_dict):
 
     for sc in stage_contacts:
         if sc.client_id__c in org_dict.keys():
-            if is_empty(sc.stage_contact_id__c):
-                sc.stage_contact_id__c = get_unique_id()
+            if is_empty(sc.stage_contact_id_ext__c):
+                sc.stage_contact_id_ext__c = get_unique_id()
             sc.authorization_form_email_consent__c = org_dict.get(
                 sc.client_id__c
             ).authorization_form_email_consent__c
@@ -383,12 +383,12 @@ def create_dictionary(objects):
     """-----------------------------------------------------------
     Description: Will create a dictionary with a list of objects
     Argument:(1)list of objects
-    Return: dictionary with the [key]=stage_contact_id__c [value]=obj
+    Return: dictionary with the [key]=stage_contact_id_ext__c [value]=obj
     -----------------------------------------------------------"""
     print("CHECK create_dictionary")
     sc_id_dict = dict()
     for obj in objects:
-        sc_id_dict[obj.stage_contact_id__c] = obj
+        sc_id_dict[obj.stage_contact_id_ext__c] = obj
     return sc_id_dict
 
 
@@ -396,15 +396,15 @@ def create_dictionary_list(objects):
     """-----------------------------------------------------------
     Description: Will create a dictionary with a list of objects
     Argument:(1)list of objects
-    Return: dictionary with the [key]=stage_contact_id__c [value]=[obj]
+    Return: dictionary with the [key]=stage_contact_id_ext__c [value]=[obj]
     -----------------------------------------------------------"""
     print("CHECK create_dictionary")
     sc_id_dict = dict()
     for obj in objects:
-        if obj.stage_contact_id__c in sc_id_dict.keys():
-            sc_id_dict.get(obj.stage_contact_id__c).append(obj)
+        if obj.stage_contact_id_ext__c in sc_id_dict.keys():
+            sc_id_dict.get(obj.stage_contact_id_ext__c).append(obj)
         else:
-            sc_id_dict[obj.stage_contact_id__c] = [obj]
+            sc_id_dict[obj.stage_contact_id_ext__c] = [obj]
     return sc_id_dict
 
 
@@ -430,12 +430,9 @@ def manage_create_records(session, stage_contacts):
     # ContactIdentifier
     cont_identifier_list = create_contact_identifier(sc_id_dict, cont_dict)
     add_objects_to_session(session, cont_identifier_list)
-
     # ContactSourceIdentifier
     contact_source_dict = contact_source_dictionary(cont_source_list)
     contact_identifier_dict = contact_identifier_dictionary(cont_identifier_list)
-    print("CHECK CS DICT {}".format(contact_source_dict))
-    print("CHECK CI DICT {}".format(contact_identifier_dict))
     cont_sou_ident_list = create_contact_source_identifier(
         contact_source_dict, contact_identifier_dict
     )
@@ -457,7 +454,7 @@ def create_contact_source_identifier(contact_source_dict, contact_identifier_dic
     for cid in contact_source_dict.keys():
         for ci in contact_identifier_dict.get(cid):
             csi = ContactSourceIdentifier()
-            csi.stage_contact_id__c = ci.stage_contact_id__c
+            csi.stage_contact_id_ext__c = ci.stage_contact_id_ext__c
             csi.contact_identifier_id_external__c = ci.contact_identifier_id__c
             csi.contact_source_id_external__c = contact_source_dict.get(
                 cid
@@ -471,15 +468,15 @@ def contact_identifier_dictionary(cont_identifier_list):
     """-----------------------------------------------------------
     Description: Will create a dictionary with a list of objects
     Argument:(1)list of objects
-    Return: dictionary with the [key]=contact_id__c [value]=[obj]
+    Return: dictionary with the [key]=contact_id_ext__c [value]=[obj]
     -----------------------------------------------------------"""
     print("CHECK contact_identifier_dictionary")
     contact_identifier_dict = dict()
     for ci in cont_identifier_list:
-        if ci.contact_id__c in contact_identifier_dict.keys():
-            contact_identifier_dict.get(ci.contact_id__c).append(ci)
+        if ci.contact_id_ext__c in contact_identifier_dict.keys():
+            contact_identifier_dict.get(ci.contact_id_ext__c).append(ci)
         else:
-            contact_identifier_dict[ci.contact_id__c] = [ci]
+            contact_identifier_dict[ci.contact_id_ext__c] = [ci]
     return contact_identifier_dict
 
 
@@ -487,12 +484,12 @@ def contact_source_dictionary(cont_source_list):
     """-----------------------------------------------------------
     Description: Will create a dictionary with a list of objects
     Argument:(1)list of cont_source_list
-    Return: dictionary with the [key]=contact_id__c [value]=contact_source_id__c
+    Return: dictionary with the [key]=contact_id_ext__c [value]=contact_source_id__c
     -----------------------------------------------------------"""
     print("CHECK contact_source_dictionary")
     contact_source_dict = dict()
     for cs in cont_source_list:
-        contact_source_dict[cs.contact_id__c] = cs
+        contact_source_dict[cs.contact_id_ext__c] = cs
     return contact_source_dict
 
 
@@ -529,8 +526,8 @@ def generic_individual(stage_contact):
     ind = Individual()
     ind.firstname = stage_contact.first_name__c
     ind.lastname = stage_contact.last_name__c
-    ind.individual_id__c = get_unique_id()
-    ind.stage_contact_id__c = stage_contact.stage_contact_id__c
+    ind.individual_id_ext__c = get_unique_id()
+    ind.stage_contact_id_ext__c = stage_contact.stage_contact_id_ext__c
 
     return ind
 
@@ -539,8 +536,8 @@ def obfuscated_individual(stage_contact):
     ind = Individual()
     ind.firstname = stage_contact.source_name__c + "FirstName"
     ind.lastname = stage_contact.source_name__c + "LastName"
-    ind.individual_id__c = get_unique_id()
-    ind.stage_contact_id__c = stage_contact.stage_contact_id__c
+    ind.individual_id_ext__c = get_unique_id()
+    ind.stage_contact_id_ext__c = stage_contact.stage_contact_id_ext__c
 
     return ind
 
@@ -556,20 +553,22 @@ def create_contact(sc_id_dict, ind_dict):
     for k in ind_dict.keys():
         if sc_id_dict.get(k).is_obfuscated__c:
             cont_list.append(
-                obfuscated_contact(sc_id_dict.get(k), ind_dict.get(k).individual_id__c)
+                obfuscated_contact(
+                    sc_id_dict.get(k), ind_dict.get(k).individual_id_ext__c
+                )
             )
         else:
             cont_list.append(
-                generic_contact(sc_id_dict.get(k), ind_dict.get(k).individual_id__c)
+                generic_contact(sc_id_dict.get(k), ind_dict.get(k).individual_id_ext__c)
             )
         if sc_id_dict.get(k).is_separate_contact__c:
             cont_list.append(
-                source_contact(sc_id_dict.get(k), ind_dict.get(k).individual_id__c)
+                source_contact(sc_id_dict.get(k), ind_dict.get(k).individual_id_ext__c)
             )
     return cont_list
 
 
-def generic_contact(stage_contact, individual_id):
+def generic_contact(stage_contact, ind_id):
     """-----------------------------------------------------------
     Description: build contact objects :: Caterpillar/MA General 
     Argument:  (1)stage contact obj (2) individual id
@@ -577,16 +576,16 @@ def generic_contact(stage_contact, individual_id):
     -----------------------------------------------------------"""
     print("CHECK generic_contact")
     c = Contact()
-    c.individual_id__c = individual_id
+    c.individual_id_ext__c = ind_id
     c.firstname = stage_contact.first_name__c
     c.lastname = stage_contact.last_name__c
     c.recordtypeid = stage_contact.generic_record_type_id__c
-    c.contact_id__c = get_unique_id()
-    c.stage_contact_id__c = stage_contact.stage_contact_id__c
+    c.contact_id_ext__c = get_unique_id()
+    c.stage_contact_id_ext__c = stage_contact.stage_contact_id_ext__c
     return c
 
 
-def source_contact(stage_contact, individual_id):
+def source_contact(stage_contact, ind_id):
     """-----------------------------------------------------------
     Description: build source contact objects :: This is the client type contact (Solar, CatFi)
     Argument:  (1)stage contact obj (2) individual id
@@ -594,16 +593,16 @@ def source_contact(stage_contact, individual_id):
     -----------------------------------------------------------"""
     print("CHECK source_contact")
     c = Contact()
-    c.individual_id__c = individual_id
+    c.individual_id_ext__c = ind_id
     c.firstname = stage_contact.first_name__c
     c.lastname = stage_contact.last_name__c
-    c.contact_id__c = get_unique_id()
+    c.contact_id_ext__c = get_unique_id()
     c.recordtypeid = stage_contact.source_contact_record_type_id__c
-    c.stage_contact_id__c = stage_contact.stage_contact_id__c
+    c.stage_contact_id_ext__c = stage_contact.stage_contact_id_ext__c
     return c
 
 
-def obfuscated_contact(stage_contact, individual_id):
+def obfuscated_contact(stage_contact, ind_id):
     """-----------------------------------------------------------
     Description: build obfustaced source contact objects 
     Argument:  (1)stage contact obj (2) individual id
@@ -611,7 +610,7 @@ def obfuscated_contact(stage_contact, individual_id):
     -----------------------------------------------------------"""
     print("CHECK obfuscated_contact")
     c = Contact()
-    c.individual_id__c = individual_id
+    c.individual_id_ext__c = ind_id
     c.bu_name__c = stage_contact.bu_name__c
     c.email = (
         "{}".format(stage_contact.source_id__c)
@@ -620,9 +619,9 @@ def obfuscated_contact(stage_contact, individual_id):
     )
     c.firstname = stage_contact.source_name__c + "FirstName"
     c.lastname = stage_contact.source_name__c + "LastName"
-    c.contact_id__c = get_unique_id()
+    c.contact_id_ext__c = get_unique_id()
     c.recordtypeid = stage_contact.source_contact_record_type_id__c
-    c.stage_contact_id__c = stage_contact.stage_contact_id__c
+    c.stage_contact_id_ext__c = stage_contact.stage_contact_id_ext__c
     return c
 
 
@@ -638,11 +637,11 @@ def create_contact_source(sc_id_dict, cont_dict):
     for k in cont_dict.keys():
         for c in cont_dict.get(k):
             cs = ContactSource()
-            cs.contact_id__c = c.contact_id__c
+            cs.contact_id_ext__c = c.contact_id_ext__c
             cs.firstname = sc_id_dict.get(k).first_name__c
             cs.lastname = sc_id_dict.get(k).last_name__c
             cs.contact_source_id__c = get_unique_id()
-            cs.stage_contact_id__c = sc_id_dict.get(k).stage_contact_id__c
+            cs.stage_contact_id_ext__c = sc_id_dict.get(k).stage_contact_id_ext__c
             cont_source_list.append(cs)
     return cont_source_list
 
@@ -658,28 +657,28 @@ def create_contact_identifier(sc_id_dict, cont_dict):
     for k in cont_dict.keys():
         for c in cont_dict.get(k):
             cont_ident_list.append(
-                master_identifier(sc_id_dict.get(k), c.contact_id__c)
+                master_identifier(sc_id_dict.get(k), c.contact_id_ext__c)
             )
             if not is_empty(sc_id_dict.get(k).source_id__c):
                 cont_ident_list.append(
-                    source_id_identifier(sc_id_dict.get(k), c.contact_id__c)
+                    source_id_identifier(sc_id_dict.get(k), c.contact_id_ext__c)
                 )
             if not sc_id_dict.get(k).is_obfuscated__c:
                 if not is_empty(sc_id_dict.get(k).email__c):
                     cont_ident_list.append(
-                        email_identifier(sc_id_dict.get(k), c.contact_id__c)
+                        email_identifier(sc_id_dict.get(k), c.contact_id_ext__c)
                     )
                 if not is_empty(sc_id_dict.get(k).phone__c):
                     cont_ident_list.append(
-                        phone_identifier(sc_id_dict.get(k), c.contact_id__c)
+                        phone_identifier(sc_id_dict.get(k), c.contact_id_ext__c)
                     )
                 if not is_empty(sc_id_dict.get(k).mobile__c):
                     cont_ident_list.append(
-                        mobile_identifier(sc_id_dict.get(k), c.contact_id__c)
+                        mobile_identifier(sc_id_dict.get(k), c.contact_id_ext__c)
                     )
                 if not is_empty(sc_id_dict.get(k).dealer_code__c):
                     cont_ident_list.append(
-                        dealer_code_identifier(sc_id_dict.get(k), c.contact_id__c)
+                        dealer_code_identifier(sc_id_dict.get(k), c.contact_id_ext__c)
                     )
                 if (
                     not is_empty(sc_id_dict.get(k).dealer_customer_number__c)
@@ -687,7 +686,7 @@ def create_contact_identifier(sc_id_dict, cont_dict):
                 ):
                     cont_ident_list.append(
                         dealer_customer_number_identifier(
-                            sc_id_dict.get(k), c.contact_id__c
+                            sc_id_dict.get(k), c.contact_id_ext__c
                         )
                     )
 
@@ -702,11 +701,11 @@ def master_identifier(stage_contact, contact_id):
     -----------------------------------------------------------"""
     print("CHECK master_identifier")
     ci = ContactIdentifier()
-    ci.contact_id__c = contact_id
+    ci.contact_id_ext__c = contact_id
     ci.identifier_type__c = "Salesforce ID"
     ci.identifier_group__c = "CRMI Master Contact ID"
     ci.contact_identifier_id__c = get_unique_id()
-    ci.stage_contact_id__c = stage_contact.stage_contact_id__c
+    ci.stage_contact_id_ext__c = stage_contact.stage_contact_id_ext__c
     return ci
 
 
@@ -718,12 +717,12 @@ def source_id_identifier(stage_contact, contact_id):
     -----------------------------------------------------------"""
     print("CHECK source_id_identifier")
     ci = ContactIdentifier()
-    ci.contact_id__c = contact_id
+    ci.contact_id_ext__c = contact_id
     ci.identifier_type__c = "Salesforce ID"
     ci.identifier_group__c = stage_contact.source_name__c + "Master Contact ID"
     ci.Identifier__c = stage_contact.source_id__c
     ci.contact_identifier_id__c = get_unique_id()
-    ci.stage_contact_id__c = stage_contact.stage_contact_id__c
+    ci.stage_contact_id_ext__c = stage_contact.stage_contact_id_ext__c
     return ci
 
 
@@ -735,12 +734,12 @@ def phone_identifier(stage_contact, contact_id):
     -----------------------------------------------------------"""
     print("CHECK phone_identifier")
     ci = ContactIdentifier()
-    ci.contact_id__c = contact_id
+    ci.contact_id_ext__c = contact_id
     ci.identifier_type__c = "Comunication Channel"
     ci.identifier_group__c = "Phone"
     cd.Identifier__c = stage_contact.phone__c
     ci.contact_identifier_id__c = get_unique_id()
-    ci.stage_contact_id__c = stage_contact.stage_contact_id__c
+    ci.stage_contact_id_ext__c = stage_contact.stage_contact_id_ext__c
     return ci
 
 
@@ -752,12 +751,12 @@ def mobile_identifier(stage_contact, contact_id):
     -----------------------------------------------------------"""
     print("CHECK phone_identifier")
     ci = ContactIdentifier()
-    ci.contact_id__c = contact_id
+    ci.contact_id_ext__c = contact_id
     ci.identifier_type__c = "Comunication Channel"
     ci.identifier_group__c = "Mobile"
     ci.Identifier__c = stage_contact.mobile__c
     ci.contact_identifier_id__c = get_unique_id()
-    ci.stage_contact_id__c = stage_contact.stage_contact_id__c
+    ci.stage_contact_id_ext__c = stage_contact.stage_contact_id_ext__c
     return ci
 
 
@@ -769,12 +768,12 @@ def email_identifier(stage_contact, contact_id):
     -----------------------------------------------------------"""
     print("CHECK email_identifier")
     ci = ContactIdentifier()
-    ci.contact_id__c = contact_id
+    ci.contact_id_ext__c = contact_id
     ci.identifier_type__c = "Comunication Channel"
     ci.identifier_group__c = "Email"
     ci.Identifier__c = stage_contact.email__c
     ci.contact_identifier_id__c = get_unique_id()
-    ci.stage_contact_id__c = stage_contact.stage_contact_id__c
+    ci.stage_contact_id_ext__c = stage_contact.stage_contact_id_ext__c
     return ci
 
 
@@ -786,12 +785,12 @@ def dealer_code_identifier(stage_contact, contact_id):
     -----------------------------------------------------------"""
     print("CHECK dealer_code_identifier")
     ci = ContactIdentifier()
-    ci.contact_id__c = contact_id
+    ci.contact_id_ext__c = contact_id
     ci.identifier_type__c = "Other Identifier"
     ci.identifier_group__c = "Dealer Code"
     ci.Identifier__c = stage_contact.dealer_code__c
     ci.contact_identifier_id__c = get_unique_id()
-    ci.stage_contact_id__c = stage_contact.stage_contact_id__c
+    ci.stage_contact_id_ext__c = stage_contact.stage_contact_id_ext__c
     return ci
 
 
@@ -803,14 +802,14 @@ def dealer_customer_number_identifier(stage_contact, contact_id):
     -----------------------------------------------------------"""
     print("CHECK dealer_code_identifier")
     ci = ContactIdentifier()
-    ci.contact_id__c = contact_id
+    ci.contact_id_ext__c = contact_id
     ci.identifier_type__c = "Other Identifier"
     ci.identifier_group__c = "DC+DCN"
     ci.Identifier__c = (
         stage_contact.dealer_code__c + stage_contact.dealer_customer_number__c
     )
     ci.contact_identifier_id__c = get_unique_id()
-    ci.stage_contact_id__c = stage_contact.stage_contact_id__c
+    ci.stage_contact_id_ext__c = stage_contact.stage_contact_id_ext__c
     return ci
 
 

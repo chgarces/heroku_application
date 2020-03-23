@@ -96,17 +96,6 @@ Base = declarative_base()
 #     telephonenumber = Column(String(40))
 
 
-class Individual(Base):
-    __tablename__ = "salesforce.individual"
-
-    id = Column(Integer, primary_key=True)
-
-    firstname = Column(String(40))
-    individual_id__c = Column(String(255), unique=True, nullable=False)
-    lastname = Column(String(80))
-    stage_contact_id__c = Column(String(255), unique=True, nullable=False)
-
-
 class OrganizationSource(Base):
     __tablename__ = "salesforce.organization_source__c"
 
@@ -195,9 +184,20 @@ class StageContact(Base):
     source_contact_record_type_id__c = Column(String(200))
     source_id__c = Column(String(255))
     source_name__c = Column(String(200))
-    stage_contact_id__c = Column(String(255))
+    stage_contact_id___c = Column(String(255))
     state_code__c = Column(String(255))
     status__c = Column(String(255))
+
+
+class Individual(Base):
+    __tablename__ = "salesforce.individual"
+
+    id = Column(Integer, primary_key=True)
+
+    firstname = Column(String(40))
+    individual_id_ext__c = Column(String(255), unique=True, nullable=False)
+    lastname = Column(String(80))
+    stage_contact_id_ext__c = Column(String(255), unique=True, nullable=False)
 
 
 class Contact(Base):
@@ -209,7 +209,7 @@ class Contact(Base):
     company_name__c = Column(String(255))
     consent_date__c = Column(DateTime)
     consent_level_summary__c = Column(String(255))
-    contact_id__c = Column(String(255), unique=True, nullable=False)
+    contact_id_ext__c = Column(String(255), unique=True, nullable=False)
     contact_id_match__c = Column(String(18))
     customer_master_id_match__c = Column(String(255))
     customuniqueid__c = Column(String(255))
@@ -220,7 +220,7 @@ class Contact(Base):
     ent_legacy_id__c = Column(String(40))
     firstname = Column(String(40))
     heroku_cms_processing_source__c = Column(String(255))
-    individual_id__c = stage_contact_id__c = Column(String(18), nullable=False)
+    individual_id_ext__c = stage_contact_id_ext__c = Column(String(18), nullable=False)
     industry__c = Column(String(255))
     industry_level_2__c = Column(String(255))
     isdeleted = Column(Boolean)
@@ -241,7 +241,7 @@ class Contact(Base):
     recordtypeid = Column(String(18))
     sfid = Column(String(18))
     solar_contact_id__c = Column(String(255))
-    stage_contact_id__c = Column(String(255), nullable=False)
+    stage_contact_id_ext__c = Column(String(255), nullable=False)
     status__c = Column(String(255))
 
 
@@ -265,7 +265,7 @@ class ContactSource(Base):
     consent_level__c = Column(String(255))
     consent_scope__c = Column(String(255))
     consent_usage__c = Column(String(255))
-    contact_id__c = stage_contact_id__c = Column(String(18), nullable=False)
+    contact_id_ext__c = stage_contact_id_ext__c = Column(String(18), nullable=False)
     contact_id__r__herokuid__c = Column(String(255))
     contact_id_match__c = Column(String(18))
     contact_source__c = Column(String(40))
@@ -320,7 +320,7 @@ class ContactSource(Base):
     source_status__c = Column(String(255))
     source_user_id__c = Column(String(255))
     sourceexternalid__c = Column(String(250))
-    stage_contact_id__c = Column(String(255), nullable=False)
+    stage_contact_id_ext__c = Column(String(255), nullable=False)
     status__c = Column(String(255))
     ucid__c = Column(String(255))
 
@@ -332,7 +332,7 @@ class ContactIdentifier(Base):
 
     connectionreceivedid = Column(String(18))
     connectionsentid = Column(String(18))
-    contact_id__c = Column(String(18))
+    contact_id_ext__c = Column(String(18), nullable=False)
     contact_id__r__herokuid__c = Column(String(255))
     contact_identifier_id__c = Column(String(255), unique=True, nullable=False)
     createdbyid = Column(String(18))
@@ -349,7 +349,7 @@ class ContactIdentifier(Base):
     matm_owner__c = Column(String(100))
     name = Column(String(80))
     sfid = Column(String(18))
-    stage_contact_id__c = Column(String(255), nullable=False)
+    stage_contact_id_ext__c = Column(String(255), nullable=False)
     status__c = Column(String(255))
     status_description__c = Column(String(255))
     status_reason__c = Column(String(255))
@@ -372,7 +372,7 @@ class ContactSourceIdentifier(Base):
     createddate = Column(DateTime)
     isdeleted = Column(Boolean)
     contact_identifier_id_external__c = Column(String(255), nullable=False)
-    stage_contact_id__c = Column(String(255), nullable=False)
+    stage_contact_id_ext__c = Column(String(255), nullable=False)
     contact_source_id_external__c = Column(String(255), nullable=False)
 
 
