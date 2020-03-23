@@ -9,7 +9,6 @@ from sqlalchemy import (
     DateTime,
     Date,
     MetaData,
-    Enum,
 )
 from sqlalchemy.ext.declarative import declarative_base
 
