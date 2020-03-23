@@ -1,4 +1,5 @@
-from session_loader import *
+from contact_model_engine import *
+from contact_utility import *
 
 # REQUIRED FIELDS
 def app_required_fields():

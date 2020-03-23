@@ -103,3 +103,34 @@ def update_stage_contacts(stage_contacts):
         sc.process_status__c = "POSTGRES COMPLETED"
         stage_contact_list.append(sc)
     return stage_contact_list
+
+
+# CREATION CONTACT SOURCE IDENTIFIER
+def contact_identifier_dictionary(cont_identifier_list):
+    """-----------------------------------------------------------
+    Description: Will create a dictionary with a list of objects
+    Argument:(1)list of objects
+    Return: dictionary with the [key]=contact_id_ext__c [value]=[obj]
+    -----------------------------------------------------------"""
+    print("CHECK contact_identifier_dictionary")
+    contact_identifier_dict = dict()
+    for ci in cont_identifier_list:
+        if ci.contact_id_ext__c in contact_identifier_dict.keys():
+            contact_identifier_dict.get(ci.contact_id_ext__c).append(ci)
+        else:
+            contact_identifier_dict[ci.contact_id_ext__c] = [ci]
+    return contact_identifier_dict
+
+
+# CREATION CONTACT SOURCE IDENTIFIER
+def contact_source_dictionary(cont_source_list):
+    """-----------------------------------------------------------
+    Description: Will create a dictionary with a list of objects
+    Argument:(1)list of cont_source_list
+    Return: dictionary with the [key]=contact_id_ext__c [value]=contact_source_id_ext__c
+    -----------------------------------------------------------"""
+    print("CHECK contact_source_dictionary")
+    contact_source_dict = dict()
+    for cs in cont_source_list:
+        contact_source_dict[cs.contact_id_ext__c] = cs
+    return contact_source_dict
