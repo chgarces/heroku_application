@@ -18,95 +18,6 @@ from sqlalchemy.ext.declarative import declarative_base
 Base = declarative_base()
 
 
-# class contactPointConsent(Base):
-#     __tablename__ = "salesforce.contactpointconsent"
-
-#     id = Column(Integer, primary_key=True)
-#     _hc_err = Column(Text)
-#     _hc_lastop = Column(String(32))
-#     authorization_form__c = Column(String(18))
-#     capturecontactpointtype = Column(String(255))
-#     capturedate = Column(DateTime)
-#     capturesource = Column(String(255))
-#     contact__c = Column(String(18))
-#     contact__herokuid__c = Column(String(255))
-#     contactpointid = Column(String(18))
-#     createddate = Column(DateTime)
-#     effectivefrom = Column(DateTime)
-#     individual__c = Column(String(18))
-#     individual__herokuid__c = Column(String(240))
-#     isdeleted = Column(Boolean)
-#     legacy_consent_level__c = Column(String(255))
-#     matm_owner__c = Column(String(100))
-#     name = Column(String(255))
-#     privacyconsentstatus = Column(String(255))
-#     sfid = Column(String(18))
-#     systemmodstamp = Column(DateTime)
-
-
-# class ContactPointEmail(Base):
-#     __tablename__ = "salesforce.contactpointemail"
-
-#     id = Column(Integer, primary_key=True)
-#     _hc_err = Column(Text)
-#     _hc_lastop = Column(String(32))
-#     activefromdate = Column(Date)
-#     contact_identifier_for_email__c = Column(String(18))
-#     contact_record__c = Column(String(18))
-#     contact_record__r__herokuid__c = Column(String(255))
-#     createddate = Column(DateTime)
-#     datausepurpose__c = Column(String(255))
-#     email_address_hashed__c = Column(String(255))
-#     email_status_mc__c = Column(String(255))
-#     emailaddress = Column(String(80))
-#     herokuid__c = Column(String(255))
-#     isdeleted = Column(Boolean)
-#     matm_owner__c = Column(String(100))
-#     name = Column(String(255))
-#     parentid = Column(String(18))
-#     privacy_consent_status__c = Column(String(255))
-#     sfid = Column(String(18))
-#     systemmodstamp = Column(DateTime)
-
-
-# class ContactPointPhone(Base):
-#     __tablename__ = "salesforce.contactpointphone"
-
-#     id = Column(Integer, primary_key=True)
-#     _hc_err = Column(Text)
-#     _hc_lastop = Column(String(32))
-#     activefromdate = Column(Date)
-#     activetodate = Column(Date)
-#     contact_identifier_for_phone__c = Column(String(18))
-#     contact_record__c = Column(String(18))
-#     contact_record__r__herokuid__c = Column(String(255))
-#     createddate = Column(DateTime)
-#     datausepurpose__c = Column(String(255))
-#     herokuid__c = Column(String(250))
-#     isbusinessphone = Column(Boolean)
-#     isdeleted = Column(Boolean)
-#     issmscapable = Column(Boolean)
-#     matm_owner__c = Column(String(100))
-#     name = Column(String(255))
-#     parentid = Column(String(18))
-#     phonetype = Column(String(255))
-#     privacy_consent_status__c = Column(String(255))
-#     sfid = Column(String(18))
-#     systemmodstamp = Column(DateTime)
-#     telephonenumber = Column(String(40))
-
-
-class Individual(Base):
-    __tablename__ = "salesforce.individual"
-
-    id = Column(Integer, primary_key=True)
-
-    firstname = Column(String(40))
-    individual_id__c = Column(String(255), unique=True, nullable=False)
-    lastname = Column(String(80))
-    stage_contact_id__c = Column(String(255), unique=True, nullable=False)
-
-
 class OrganizationSource(Base):
     __tablename__ = "salesforce.organization_source__c"
 
@@ -131,6 +42,7 @@ class StageContact(Base):
     __tablename__ = "salesforce.stage_contact__c"
 
     id = Column(Integer, primary_key=True)
+
     authorization_form_email_consent__c = Column(String(18))
     authorization_form_sms_consent__c = Column(String(18))
     billing_zip_postal_code__c = Column(String(255))
@@ -195,9 +107,20 @@ class StageContact(Base):
     source_contact_record_type_id__c = Column(String(200))
     source_id__c = Column(String(255))
     source_name__c = Column(String(200))
-    stage_contact_id__c = Column(String(255))
+    stage_contact_id_ext__c = Column(String(255))
     state_code__c = Column(String(255))
     status__c = Column(String(255))
+
+
+class Individual(Base):
+    __tablename__ = "salesforce.individual"
+
+    id = Column(Integer, primary_key=True)
+
+    firstname = Column(String(40))
+    individual_id_ext__c = Column(String(255), unique=True, nullable=False)
+    lastname = Column(String(80))
+    stage_contact_id_ext__c = Column(String(255), unique=True, nullable=False)
 
 
 class Contact(Base):
@@ -209,7 +132,7 @@ class Contact(Base):
     company_name__c = Column(String(255))
     consent_date__c = Column(DateTime)
     consent_level_summary__c = Column(String(255))
-    contact_id__c = Column(String(255), unique=True, nullable=False)
+    contact_id_ext__c = Column(String(255), unique=True, nullable=False)
     contact_id_match__c = Column(String(18))
     customer_master_id_match__c = Column(String(255))
     customuniqueid__c = Column(String(255))
@@ -220,7 +143,7 @@ class Contact(Base):
     ent_legacy_id__c = Column(String(40))
     firstname = Column(String(40))
     heroku_cms_processing_source__c = Column(String(255))
-    individual_id__c = stage_contact_id__c = Column(String(18), nullable=False)
+    individual_id_ext__c = Column(String(18), nullable=False)
     industry__c = Column(String(255))
     industry_level_2__c = Column(String(255))
     isdeleted = Column(Boolean)
@@ -241,7 +164,7 @@ class Contact(Base):
     recordtypeid = Column(String(18))
     sfid = Column(String(18))
     solar_contact_id__c = Column(String(255))
-    stage_contact_id__c = Column(String(255), nullable=False)
+    stage_contact_id_ext__c = Column(String(255), nullable=False)
     status__c = Column(String(255))
 
 
@@ -265,12 +188,12 @@ class ContactSource(Base):
     consent_level__c = Column(String(255))
     consent_scope__c = Column(String(255))
     consent_usage__c = Column(String(255))
-    contact_id__c = stage_contact_id__c = Column(String(18), nullable=False)
     contact_id__r__herokuid__c = Column(String(255))
+    contact_id_ext__c = Column(String(18), nullable=False)
     contact_id_match__c = Column(String(18))
     contact_source__c = Column(String(40))
     contact_source_details_most_recent__c = Column(String(255))
-    contact_source_id__c = Column(String(255), unique=True, nullable=False)
+    contact_source_id_ext__c = Column(String(255), unique=True, nullable=False)
     contact_source_most_recent__c = Column(String(255))
     contact_source_reference_date__c = Column(DateTime)
     createddate = Column(DateTime)
@@ -320,7 +243,7 @@ class ContactSource(Base):
     source_status__c = Column(String(255))
     source_user_id__c = Column(String(255))
     sourceexternalid__c = Column(String(250))
-    stage_contact_id__c = Column(String(255), nullable=False)
+    stage_contact_id_ext__c = Column(String(255), nullable=False)
     status__c = Column(String(255))
     ucid__c = Column(String(255))
 
@@ -332,9 +255,9 @@ class ContactIdentifier(Base):
 
     connectionreceivedid = Column(String(18))
     connectionsentid = Column(String(18))
-    contact_id__c = Column(String(18))
     contact_id__r__herokuid__c = Column(String(255))
-    contact_identifier_id__c = Column(String(255), unique=True, nullable=False)
+    contact_id_ext__c = Column(String(18), nullable=False)
+    contact_identifier_id_ext__c = Column(String(255), unique=True, nullable=False)
     createdbyid = Column(String(18))
     createddate = Column(DateTime)
     expiration_date__c = Column(Date)
@@ -349,7 +272,7 @@ class ContactIdentifier(Base):
     matm_owner__c = Column(String(100))
     name = Column(String(80))
     sfid = Column(String(18))
-    stage_contact_id__c = Column(String(255), nullable=False)
+    stage_contact_id_ext__c = Column(String(255), nullable=False)
     status__c = Column(String(255))
     status_description__c = Column(String(255))
     status_reason__c = Column(String(255))
@@ -367,22 +290,113 @@ class ContactSourceIdentifier(Base):
     contact_id__r__herokuid__c = Column(String(255))
     contact_identifier_id__c = Column(String(18))
     contact_identifier_id__r__herokuid__c = Column(String(255))
+    contact_identifier_id_ext__c = Column(String(255), nullable=False)
     contact_source_id__c = Column(String(18))
     contact_source_id__r__herokuid__c = Column(String(255))
+    contact_source_id_ext__c = Column(String(255), nullable=False)
+    contact_source_identifier_id_ext__c = Column(
+        String(255), unique=True, nullable=False
+    )
+    stage_contact_id_ext__c = Column(String(255), nullable=False)
+
+
+class ContactPointEmail(Base):
+    __tablename__ = "salesforce.contactpointemail"
+
+    id = Column(Integer, primary_key=True)
+
+    activefromdate = Column(Date)
+    contact_identifier_for_email__c = Column(String(18))
+    contact_identifier_id_ext__c = Column(String(255), nullable=False)
+    contact_point_email_id_ext__c = Column(String(255), unique=True, nullable=False)
+    contact_record__c = Column(String(18))
+    contact_record__r__herokuid__c = Column(String(255))
     createddate = Column(DateTime)
+    datausepurpose__c = Column(String(255))
+    email_address_hashed__c = Column(String(255))
+    email_status_mc__c = Column(String(255))
+    emailaddress = Column(String(80))
+    herokuid__c = Column(String(255))
     isdeleted = Column(Boolean)
-    contact_identifier_id_external__c = Column(String(255), nullable=False)
-    stage_contact_id__c = Column(String(255), nullable=False)
-    contact_source_id_external__c = Column(String(255), nullable=False)
+    matm_owner__c = Column(String(100))
+    name = Column(String(255))
+    parentid = Column(String(18))
+    privacy_consent_status__c = Column(String(255))
+    stage_contact_id_ext__c = Column(String(255), nullable=False)
+
+
+class ContactPointPhone(Base):
+    __tablename__ = "salesforce.contactpointphone"
+
+    id = Column(Integer, primary_key=True)
+
+    activefromdate = Column(Date)
+    activetodate = Column(Date)
+    contact_identifier_for_phone__c = Column(String(18))
+    contact_identifier_id_ext__c = Column(String(255), nullable=False)
+    contact_point_phone_id_ext__c = Column(String(255), unique=True, nullable=False)
+    contact_record__c = Column(String(18))
+    contact_record__r__herokuid__c = Column(String(255))
+    createddate = Column(DateTime)
+    datausepurpose__c = Column(String(255))
+    herokuid__c = Column(String(250))
+    isbusinessphone = Column(Boolean)
+    isdeleted = Column(Boolean)
+    issmscapable = Column(Boolean)
+    matm_owner__c = Column(String(100))
+    name = Column(String(255))
+    parentid = Column(String(18))
+    phonetype = Column(String(255))
+    privacy_consent_status__c = Column(String(255))
+    sfid = Column(String(18))
+    systemmodstamp = Column(DateTime)
+    telephonenumber = Column(String(40))
+
+
+class contactPointConsent(Base):
+    __tablename__ = "salesforce.contactpointconsent"
+
+    id = Column(Integer, primary_key=True)
+
+    authorization_form__c = Column(String(18))
+    capturecontactpointtype = Column(String(255))
+    capturedate = Column(DateTime)
+    capturesource = Column(String(255))
+    contact__c = Column(String(18))
+    contact__herokuid__c = Column(String(255))
+    contactpointid = Column(String(18))
+    createddate = Column(DateTime)
+    effectivefrom = Column(DateTime)
+    individual__c = Column(String(18))
+    individual__herokuid__c = Column(String(240))
+    isdeleted = Column(Boolean)
+    legacy_consent_level__c = Column(String(255))
+    matm_owner__c = Column(String(100))
+    name = Column(String(255))
+    privacyconsentstatus = Column(String(255))
+    sfid = Column(String(18))
+    systemmodstamp = Column(DateTime)
+    contact_point_consent_id_ext__c = Column(String(255), unique=True, nullable=False)
+    stage_contact_id_ext__c = Column(String(255), nullable=False)
+    individual_id_ext__c = Column(String(18), nullable=False)
+    email_data_use_purpose__c = Column(String(255))
+    sms_data_use_purpose__c = Column(String(255))
 
 
 engine = create_engine("sqlite:///hcms_db", echo=True)
+
+
 if __name__ == "__main__":
 
     # Base.metadata.drop_all(bind=engine, tables=[Individual.__table__])
     # Base.metadata.drop_all(bind=engine, tables=[StageContact.__table__])
     # Base.metadata.drop_all(bind=engine, tables=[Contact.__table__])
-    # Base.metadata.drop_all(bind=engine, tables=[OrganizationSource.__table__])
     # Base.metadata.drop_all(bind=engine, tables=[ContactIdentifier.__table__])
     # Base.metadata.drop_all(bind=engine, tables=[ContactSource.__table__])
+    # Base.metadata.drop_all(bind=engine, tables=[ContactSourceIdentifier.__table__])
+    # Base.metadata.drop_all(bind=engine, tables=[ContactPointEmail.__table__])
+    # Base.metadata.drop_all(bind=engine, tables=[ContactPointPhone.__table__])
+    # Base.metadata.drop_all(bind=engine, tables=[contactPointConsent.__table__])
     Base.metadata.create_all(bind=engine)
+
+    # Base.metadata.drop_all(bind=engine, tables=[OrganizationSource.__table__])
