@@ -18,32 +18,6 @@ from sqlalchemy.ext.declarative import declarative_base
 Base = declarative_base()
 
 
-# class contactPointConsent(Base):
-#     __tablename__ = "salesforce.contactpointconsent"
-
-#     id = Column(Integer, primary_key=True)
-#     _hc_err = Column(Text)
-#     _hc_lastop = Column(String(32))
-#     authorization_form__c = Column(String(18))
-#     capturecontactpointtype = Column(String(255))
-#     capturedate = Column(DateTime)
-#     capturesource = Column(String(255))
-#     contact__c = Column(String(18))
-#     contact__herokuid__c = Column(String(255))
-#     contactpointid = Column(String(18))
-#     createddate = Column(DateTime)
-#     effectivefrom = Column(DateTime)
-#     individual__c = Column(String(18))
-#     individual__herokuid__c = Column(String(240))
-#     isdeleted = Column(Boolean)
-#     legacy_consent_level__c = Column(String(255))
-#     matm_owner__c = Column(String(100))
-#     name = Column(String(255))
-#     privacyconsentstatus = Column(String(255))
-#     sfid = Column(String(18))
-#     systemmodstamp = Column(DateTime)
-
-
 class OrganizationSource(Base):
     __tablename__ = "salesforce.organization_source__c"
 
@@ -375,9 +349,38 @@ class ContactPointPhone(Base):
     phonetype = Column(String(255))
     privacy_consent_status__c = Column(String(255))
     sfid = Column(String(18))
-    stage_contact_id_ext__c = Column(String(255), nullable=False)
     systemmodstamp = Column(DateTime)
     telephonenumber = Column(String(40))
+
+
+class contactPointConsent(Base):
+    __tablename__ = "salesforce.contactpointconsent"
+
+    id = Column(Integer, primary_key=True)
+
+    authorization_form__c = Column(String(18))
+    capturecontactpointtype = Column(String(255))
+    capturedate = Column(DateTime)
+    capturesource = Column(String(255))
+    contact__c = Column(String(18))
+    contact__herokuid__c = Column(String(255))
+    contactpointid = Column(String(18))
+    createddate = Column(DateTime)
+    effectivefrom = Column(DateTime)
+    individual__c = Column(String(18))
+    individual__herokuid__c = Column(String(240))
+    isdeleted = Column(Boolean)
+    legacy_consent_level__c = Column(String(255))
+    matm_owner__c = Column(String(100))
+    name = Column(String(255))
+    privacyconsentstatus = Column(String(255))
+    sfid = Column(String(18))
+    systemmodstamp = Column(DateTime)
+    contact_point_consent_id_ext__c = Column(String(255), unique=True, nullable=False)
+    stage_contact_id_ext__c = Column(String(255), nullable=False)
+    individual_id_ext__c = Column(String(18), nullable=False)
+    email_data_use_purpose__c = Column(String(255))
+    sms_data_use_purpose__c = Column(String(255))
 
 
 engine = create_engine("sqlite:///hcms_db", echo=True)
@@ -393,6 +396,7 @@ if __name__ == "__main__":
     # Base.metadata.drop_all(bind=engine, tables=[ContactSourceIdentifier.__table__])
     # Base.metadata.drop_all(bind=engine, tables=[ContactPointEmail.__table__])
     # Base.metadata.drop_all(bind=engine, tables=[ContactPointPhone.__table__])
+    # Base.metadata.drop_all(bind=engine, tables=[contactPointConsent.__table__])
     Base.metadata.create_all(bind=engine)
 
     # Base.metadata.drop_all(bind=engine, tables=[OrganizationSource.__table__])
