@@ -7,13 +7,6 @@ engine = create_engine("sqlite:///hcms_db", echo=False)
 Base = declarative_base(engine)
 
 
-
-# class ContactSourceIdentifier(Base):
-
-#     __tablename__ = "salesforce.contact_source_identifier__c"
-#     __table_args__ = {"autoload": True}
-
-
 # class ContactPointConsent(Base):
 
 #     __tablename__ = "salesforce.contactpointconsent"
@@ -58,6 +51,12 @@ class ContactSource(Base):
 class ContactIdentifier(Base):
 
     __tablename__ = "salesforce.contact_identifier__c"
+    __table_args__ = {"autoload": True}
+
+
+class ContactSourceIdentifier(Base):
+
+    __tablename__ = "salesforce.contact_source_identifier__c"
     __table_args__ = {"autoload": True}
 
 

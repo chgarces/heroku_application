@@ -1,0 +1,80 @@
+ 
+Request structure:
+    {
+    "return-contact-id": false,
+    "organisation-source-id": "10003",
+    "send": false,
+    "contact-data": [
+		{
+            "contact-source-most-recent": "SourceTurbines",
+            "mobile": "8795648752",
+            "mailing-postal-code": "28140-1513",
+            "language": "EN",
+            "last-name": "Test",
+            "state-code": "SD",
+            "dealer_customer_number": "",
+            "first-name": "Collins",
+            "consent-date": "2020-02-01T07:30:44",
+            "bu-name": "Solar",
+            "email": "lynn.c123@test.com",
+            "country-code": "US",
+            "mailing-city": "Walkerfurt",
+            "data-processing": "Processor",
+            "mailing-street": "Jeanette Viaduct",
+            "heroku-cms-processing": "Shop Solar Registration Process",
+            "form-name": "Shop Solar Registration Process",
+            "campaign-most-recent": "Shop Solar Registration Process",
+            "dealer-code": "",
+            "email-opt-in-status": "Seen",
+            "sms-opt-in-status": "Seen",
+            "crmi-master-contact-id": "",
+            "data-use-purpose": "DL",
+            "ingestion-point": "Solar",
+            "contact-source-most-recent-details": "Shop Solar Registration Process",
+            "phone": "2345678902",
+            "company-name": "Mcmahon-Young",
+            "source-id": "lynn.c@test.com",
+            "change-email": false,
+            "old-email": "",
+			"job-role": "Processor",
+			"level-of-interest": "",
+			"purchase-timeframe": "",
+			"industry": "",
+			"industry-level-2": "",
+			"product-of-interest ": "",
+			"product-of-interest-text": "",
+			"campaign": "",
+			"client-id":"10003",
+			"mailing-country":"US",
+			"source-detail":"SolarTurbines",
+			"return-contact-id": false
+        }
+    ],
+    "triggered-send-details": {
+        "triggered-send-name": "Madison Marsh",
+        "details": {
+            "To": {
+                "ContactAttributes": {
+                    "SubscriberAttributes": {
+                        "Country": "Indonesia",
+                        "SubscriberKey": "XuLpZycrXA",
+                        "EmailAddress": "olsonshawn@smith.com",
+                        "promo-code": "0720974",
+                        "name-first": "Veronica",
+                        "contactsource": "Jasonbury",
+                        "name-last": "Stevenson",
+                        "name-company": "Baird Inc"
+                    }
+                }
+            },
+            "Options": {
+                "RequestType": "Sync"
+            }
+        }
+    },
+    "sfmc-details": {
+        "client-secret": "xym7reBWYRZ0QM4G",
+        "client-id": "ikue2O9EHu1hkF6O",
+        "sub-domain": "1qVpty1MZxmTWb4e"
+    }
+}"

@@ -357,24 +357,23 @@ class ContactIdentifier(Base):
     status_time__c = Column(DateTime)
 
 
-# class ContactSourceIdentifier(Base):
-#     __tablename__ = "salesforce.contact_source_Identifier__c"
+class ContactSourceIdentifier(Base):
+    __tablename__ = "salesforce.contact_source_Identifier__c"
 
-#     id = Column(Integer, primary_key=True)
-#     _hc_err = Column(Text)
-#     _hc_lastop = Column(String(32))
-#     connectionsentid = Column(String(18))
-#     contact_id__c = Column(String(18))
-#     contact_id__r__herokuid__c = Column(String(255))
-#     contact_identifier_id__c = Column(String(18))
-#     contact_identifier_id__r__herokuid__c = Column(String(255))
-#     contact_source_id__c = Column(String(18))
-#     contact_source_id__r__herokuid__c = Column(String(255))
-#     createddate = Column(DateTime)
-#     isdeleted = Column(Boolean)
-#     name = Column(String(80))
-#     sfid = Column(String(18))
-#     systemmodstamp = Column(DateTime)
+    id = Column(Integer, primary_key=True)
+
+    connectionsentid = Column(String(18))
+    contact_id__c = Column(String(18))
+    contact_id__r__herokuid__c = Column(String(255))
+    contact_identifier_id__c = Column(String(18))
+    contact_identifier_id__r__herokuid__c = Column(String(255))
+    contact_source_id__c = Column(String(18))
+    contact_source_id__r__herokuid__c = Column(String(255))
+    createddate = Column(DateTime)
+    isdeleted = Column(Boolean)
+    contact_identifier_id_external__c = Column(String(255), nullable=False)
+    stage_contact_id__c = Column(String(255), nullable=False)
+    contact_source_id_external__c = Column(String(255), nullable=False)
 
 
 engine = create_engine("sqlite:///hcms_db", echo=True)
