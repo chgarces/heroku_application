@@ -131,13 +131,10 @@ def create_contact_point_email(cont_identifier_list, sc_dict, cont_dict):
     Argument: (1)list of email contact identifiers 
     Return: list of contact point email
     -----------------------------------------------------------"""
-    # print("CHECK create_contact_point_email")
-    # print("CHECK sc_dict {}".format(sc_dict))
-    # print("CHECK cont_dict {}".format(cont_dict))
+    print("create_contact_point_email")
+
     cont_point_email_list = []
     for ci in cont_identifier_list:
-        #     print("CHECK SC ID {}".format(ci.stage_contact_id_ext__c))
-        #     print("CHECK CONT ID {}".format(ci.contact_id_ext__c))
         cont_point_email_list.append(
             contact_point_email(
                 ci,
@@ -190,24 +187,6 @@ def create_contact_point_mobile(cont_identifier_list, sc_dict, cont_dict):
     return cont_point_mobile_list
 
 
-# CREATION CONTACT POINT CONSENT
-def create_contact_point_consent(cont_point_list, sc_dict, ind_dict):
-    """-----------------------------------------------------------
-    Description: Create contact point consent 
-    Argument:(1)list of contact point (email/phone/mobile) (2)Stage contact dictionary (3)Individual dictionary
-    Return: list of contact point consent 
-    -----------------------------------------------------------"""
-    print("CHECK create_contact_point_consent")
-    cont_consent_list = []
-    for cp in cont_point_list:
-        cont_consent_list.append(
-            contact_point_consent(
-                cp, ind_dict.get(cp.stage_contact_id_ext__c).individual_id_ext__c
-            )
-        )
-    return cont_consent_list
-
-
 # GENERIC
 def manage_create_records(session, stage_contacts):
     """-----------------------------------------------------------
@@ -238,44 +217,124 @@ def manage_create_records(session, stage_contacts):
         contact_source_dict, contact_identifier_dict
     )
     add_objects_to_session(session, cont_sou_ident_list)
-    # ContactPoints
-    cont_point_email_list = []
-    cont_point_phone_list = []
-    cont_point_mobile_list = []
-    # ContactPoints EMAIL
+
+    # ContactPoint EMAIL
     cont_id_dict = contact_dictionary(cont_list)
     cont_ident_email_list = filter_contact_point(cont_identifier_list, EMAIL)
-    if len(cont_ident_email_list) > 0:
-        cont_point_email_list = create_contact_point_email(
-            cont_ident_email_list, sc_dict, cont_id_dict
-        )
-        add_objects_to_session(session, cont_point_email_list)
-    # ContactPoints MOBILE
+    cont_point_email_list = create_contact_point_email(
+        cont_ident_email_list, sc_dict, cont_id_dict
+    )
+    add_objects_to_session(session, cont_point_email_list)
+
+    # ContactPoint MOBILE
     cont_ident_mobile_list = filter_contact_point(cont_identifier_list, MOBILE)
-    if len(cont_ident_mobile_list) > 0:
-        cont_point_mobile_list = create_contact_point_mobile(
-            cont_ident_mobile_list, sc_dict, cont_id_dict
-        )
-        add_objects_to_session(session, cont_point_mobile_list)
+    cont_point_mobile_list = create_contact_point_mobile(
+        cont_ident_mobile_list, sc_dict, cont_id_dict
+    )
+    add_objects_to_session(session, cont_point_mobile_list)
+
     # ContactPoints PHONE
     cont_ident_phone_list = filter_contact_point(cont_identifier_list, PHONE)
-    if len(cont_ident_phone_list) > 0:
-        cont_point_phone_list = create_contact_point_phone(
-            cont_ident_phone_list, sc_dict, cont_id_dict
-        )
-        add_objects_to_session(session, cont_point_phone_list)
+    cont_point_phone_list = create_contact_point_phone(
+        cont_ident_phone_list, sc_dict, cont_id_dict
+    )
+    add_objects_to_session(session, cont_point_phone_list)
 
-    # add_objects_to_session(session, cont_point_list)
+    # MOBILE CONSENT
+    mobile_consent_list = create_contact_consent_mobile(
+        cont_point_mobile_list, sc_dict, cont_id_dict
+    )
+    add_objects_to_session(session, mobile_consent_list)
 
-    # ContactPointConsent
-    # cont_consent_list = create_contact_point_consent(cont_point_list, sc_dict, ind_dict)
-    # add_objects_to_session(session, cont_consent_list)
+    # EMAIL CONSENT
+    email_consent_list = create_contact_consent_email(
+        cont_point_email_list, sc_dict, cont_id_dict
+    )
+    add_objects_to_session(session, email_consent_list)
+
+    # PHONE CONSENT
+    phone_consent_list = create_contact_consent_phone(
+        cont_point_phone_list, sc_dict, cont_id_dict
+    )
+    add_objects_to_session(session, phone_consent_list)
 
     if session.new:
         dml_stage_contact(session)
         # update StageContacts status
         add_objects_to_session(session, update_stage_contacts(stage_contacts))
         dml_stage_contact(session)
+
+
+def create_contact_consent_email(cont_point_list, sc_dict, cont_id_dict):
+    """-----------------------------------------------------------
+    Description: mange the creation of contact consent for email
+    Argument:(1)session (2)list of stage contacts
+    Return: 
+    -----------------------------------------------------------"""
+    email_consent_list = []
+    for cp in cont_point_list:
+        email_consent_list.append(
+            email_contact_point_consent(
+                cp,
+                sc_dict.get(cp.stage_contact_id_ext__c),
+                cont_id_dict.get(cp.contact_id_ext__c),
+            )
+        )
+    return email_consent_list
+
+
+def create_contact_consent_mobile(cont_point_list, sc_dict, cont_id_dict):
+    """-----------------------------------------------------------
+    Description: mange the creation of contact consent for mobile
+    Argument:(1)session (2)list of stage contacts
+    Return: 
+    -----------------------------------------------------------"""
+    mobile_consent_list = []
+    for cp in cont_point_list:
+        mobile_consent_list.append(
+            mobile_contact_point_consent(
+                cp,
+                sc_dict.get(cp.stage_contact_id_ext__c),
+                cont_id_dict.get(cp.contact_id_ext__c),
+            )
+        )
+    return mobile_consent_list
+
+
+def create_contact_consent_phone(cont_point_list, sc_dict, cont_id_dict):
+    """-----------------------------------------------------------
+    Description: mange the creation of contact consent for phone
+    Argument:(1)session (2)list of stage contacts
+    Return: 
+    -----------------------------------------------------------"""
+    phone_consent_list = []
+    for cp in cont_point_list:
+        phone_consent_list.append(
+            phone_contact_point_consent(
+                cp,
+                sc_dict.get(cp.stage_contact_id_ext__c),
+                cont_id_dict.get(cp.contact_id_ext__c),
+            )
+        )
+    return phone_consent_list
+
+
+# CREATION CONTACT POINT CONSENT
+# def create_contact_point_consent(cont_point_list, sc_dict, ind_dict):
+#     """-----------------------------------------------------------
+#     Description: Create contact point consent
+#     Argument:(1)list of contact point (email/phone/mobile) (2)Stage contact dictionary (3)Individual dictionary
+#     Return: list of contact point consent
+#     -----------------------------------------------------------"""
+#     print("CHECK create_contact_point_consent")
+#     cont_consent_list = []
+#     for cp in cont_point_list:
+#         cont_consent_list.append(
+#             contact_point_consent(
+#                 cp, ind_dict.get(cp.stage_contact_id_ext__c).individual_id_ext__c
+#             )
+#         )
+#     return cont_consent_list
 
 
 # MAIN

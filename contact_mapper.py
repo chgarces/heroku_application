@@ -3,6 +3,9 @@ from contact_utility import *
 from contact_variables import *
 from datetime import datetime, date
 
+
+# STAGE CONTACT
+
 # CREATION INDIVIDUAL
 def generic_individual(stage_contact):
     """-----------------------------------------------------------
@@ -511,7 +514,7 @@ def contact_point_phone(cont_ident, stage_contact, contact):
 
 
 # CONTACT EMAIL POINT CONSENT
-def email_contact_point_consent(cont_point, stage_contact, cont_dict):
+def email_contact_point_consent(cont_point, stage_contact, contact):
     """-----------------------------------------------------------
     Description: Email Contact Point Consent Mapper
     Argument:  (1)contact identifier object (2)stage contact (3)comtact
@@ -543,9 +546,7 @@ def email_contact_point_consent(cont_point, stage_contact, cont_dict):
     epc.data_use_purpose_id_ext__c = stage_contact.email_data_use_purpose__c
     epc.contact_point_consent_id_ext__c = get_unique_id()
     epc.stage_contact_id_ext__c = cont_point.stage_contact_id_ext__c
-    epc.contact_id_ext__c = cont_dict.get(
-        stage_contact.stage_contact_id_ext__c
-    ).contact_id_ext__c
+    epc.contact_id_ext__c = contact.contact_id_ext__c
     epc.contact_point_id_ext__c = cont_point.contact_point_email_id_ext__c
     epc.authorization_form_id_ext__c = stage_contact.authorization_form_id_ext__c
 
@@ -553,7 +554,7 @@ def email_contact_point_consent(cont_point, stage_contact, cont_dict):
 
 
 # CONTACT MOBILE POINT CONSENT
-def mobile_contact_point_consent(cont_point, stage_contact, cont_dict):
+def mobile_contact_point_consent(cont_point, stage_contact, contact):
     """-----------------------------------------------------------
     Description: Mobile Contact Point Consent Mapper
     Argument:  (1)contact identifier object (2)stage contact (3)comtact
@@ -585,9 +586,7 @@ def mobile_contact_point_consent(cont_point, stage_contact, cont_dict):
     mpc.data_use_purpose_id_ext__c = stage_contact.sms_data_use_purpose__c
     mpc.contact_point_consent_id_ext__c = get_unique_id()
     mpc.stage_contact_id_ext__c = cont_point.stage_contact_id_ext__c
-    mpc.contact_id_ext__c = cont_dict.get(
-        stage_contact.stage_contact_id_ext__c
-    ).contact_id_ext__c
+    mpc.contact_id_ext__c = contact.contact_id_ext__c
     mpc.contact_point_id_ext__c = cont_point.contact_point_phone_id_ext__c
     mpc.authorization_form_id_ext__c = stage_contact.authorization_form_id_ext__c
 
@@ -595,7 +594,7 @@ def mobile_contact_point_consent(cont_point, stage_contact, cont_dict):
 
 
 # CONTACT PHONE POINT CONSENT
-def phone_contact_point_consent(cont_point, stage_contact, cont_dict):
+def phone_contact_point_consent(cont_point, stage_contact, contact):
     """-----------------------------------------------------------
     Description: Phone Contact Point Consent Mapper
     Argument:  (1)contact identifier object (2)stage contact (3)comtact
@@ -626,9 +625,7 @@ def phone_contact_point_consent(cont_point, stage_contact, cont_dict):
     # ID'S
     ppc.contact_point_consent_id_ext__c = get_unique_id()
     ppc.stage_contact_id_ext__c = cont_point.stage_contact_id_ext__c
-    ppc.contact_id_ext__c = cont_dict.get(
-        stage_contact.stage_contact_id_ext__c
-    ).contact_id_ext__c
+    ppc.contact_id_ext__c = contact.contact_id_ext__c
     ppc.contact_point_id_ext__c = cont_point.contact_point_phone_id_ext__c
 
     return ppc

@@ -29,7 +29,7 @@ def object_as_dict(obj):
 
 
 # REQUIRED FIELDS
-def required_field_validator(session, obj):
+def required_field_validator(obj):
     """-----------------------------------------------------------
     Description: will validate required fields from a given object
     Argument: (1)session (2)object
@@ -44,6 +44,7 @@ def required_field_validator(session, obj):
     if len(required_errors) > 0:
         rfv[HAS_ERROR] = True
         rfv[ERROR_FIELDS] = required_errors
+
     return rfv
 
 
@@ -82,7 +83,7 @@ def validate_mobile_fields(session, stage_contacts):
                 sc.error_message__c = " sms_consent_date__c,"
             if is_empty(sc.sms_data_use_purpose__c):
                 sc.status__c = FAILED
-                sc.error_message__c += " sms_consent_date__c,"
+                sc.error_message__c += " sms_data_use_purpose__c,"
             if not is_empty(sc.error_message__c):
                 sc.error_message__c = "REQUIRED FIELDS MISSING : " + sc.error_message__c
         session.add(sc)
@@ -100,12 +101,12 @@ def validate_required_fields(session, stage_contacts):
     print("CHECK validate_stage_contacts")
     rfv = dict()
     for sc in stage_contacts:
-        rfv = required_field_validator(session, sc)
+        rfv = required_field_validator(sc)
         sc.process_status__c = REQUIRED_FIELDS
         if rfv.get(HAS_ERROR):
             sc.status__c = FAILED
             sc.error_message__c = "REQUIRED FIELDS MISSING : {}".format(
-                ", ".join(rfv.get())
+                ", ".join(rfv.get(ERROR_FIELDS))
             )
             session.add(sc)
         else:

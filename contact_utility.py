@@ -22,8 +22,9 @@ def app_required_fields():
         # "heroku_cms_processing__c",
         # "ingestion_point__c",
         "last_name__c",
-        # "phone__c",
+        "phone__c",
         # "state_code__c",
+        "mobile__c",
     )
     return app_required
 
