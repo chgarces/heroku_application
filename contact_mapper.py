@@ -5,6 +5,45 @@ from datetime import datetime, date
 
 
 # STAGE CONTACT
+def organization_source(sc, org_dict):
+    """-----------------------------------------------------------
+    Description: Organization Source Org mapper 
+    Argument: (1)stage contacts
+    Return: Individual object
+    -----------------------------------------------------------"""
+
+    if sc.client_id__c in org_dict.keys():
+        if is_empty(sc.stage_contact_id_ext__c):
+            sc.stage_contact_id_ext__c = get_unique_id()
+        sc.authorization_form_email_consent__c = org_dict.get(
+            sc.client_id__c
+        ).authorization_form_email_consent__c
+        sc.authorization_form_sms_consent__c = org_dict.get(
+            sc.client_id__c
+        ).authorization_form_sms_consent__c
+        sc.is_active__c = org_dict.get(sc.client_id__c).is_active__c
+        sc.is_app__c = org_dict.get(sc.client_id__c).is_app__c
+        sc.is_cat_consent__c = org_dict.get(sc.client_id__c).is_cat_consent__c
+        sc.is_dealer__c = org_dict.get(sc.client_id__c).is_dealer__c
+        sc.is_obfuscated__c = org_dict.get(sc.client_id__c).is_obfuscated__c
+        sc.is_salesforce_org__c = org_dict.get(sc.client_id__c).is_salesforce_org__c
+        sc.is_separate_contact__c = org_dict.get(sc.client_id__c).is_separate_contact__c
+        sc.process_status__c = ORG_SOURCE
+        sc.source_contact_record_type_id__c = org_dict.get(
+            sc.client_id__c
+        ).source_contact_record_type_id__c
+        sc.generic_record_type_id__c = org_dict.get(
+            sc.client_id__c
+        ).generic_record_type_id__c
+        sc.source_name__c = org_dict.get(sc.client_id__c).source_name__c
+        sc.status__c = IN_PROGRESS
+    else:
+        sc.process_status__c = ORG_SOURCE
+        sc.status__c = FAILED
+        sc.error_message__c = CLIENT_DOES_NOT_EXIST
+
+    return sc
+
 
 # CREATION INDIVIDUAL
 def generic_individual(stage_contact):
