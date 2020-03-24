@@ -1,3 +1,4 @@
+# VARIABLES
 FIRSTNAME = "FirstName"
 LASTNAME = "LastName"
 CATERPILLAR = "Caterpillar"

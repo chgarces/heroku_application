@@ -382,7 +382,7 @@ class ContactPointConsent(Base):
 
 engine = create_engine("sqlite:///contact_database", echo=True)
 
-
+# MAIN
 if __name__ == "__main__":
 
     # Base.metadata.drop_all(bind=engine, tables=[StageContact.__table__])

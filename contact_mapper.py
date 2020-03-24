@@ -3,7 +3,6 @@ from contact_utility import *
 from contact_variables import *
 from datetime import datetime
 
-
 # CREATION INDIVIDUAL
 def generic_individual(stage_contact):
     """-----------------------------------------------------------

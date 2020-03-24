@@ -1,7 +1,7 @@
 from contact_model_engine import *
 from contact_utility import *
 
-
+#
 # REQUIRED FIELDS
 def client_type_required_fields(stage_contact):
     """-----------------------------------------------------------

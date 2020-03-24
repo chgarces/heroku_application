@@ -246,6 +246,7 @@ def manage_create_records(session, stage_contacts):
         dml_stage_contact(session)
 
 
+# MAIN
 if __name__ == "__main__":
     session = loadSession()
     # DEBUG
