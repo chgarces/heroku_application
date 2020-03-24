@@ -395,6 +395,6 @@ if __name__ == "__main__":
     Base.metadata.drop_all(bind=engine, tables=[ContactPointEmail.__table__])
     Base.metadata.drop_all(bind=engine, tables=[ContactPointPhone.__table__])
     Base.metadata.drop_all(bind=engine, tables=[ContactPointConsent.__table__])
-    Base.metadata.create_all(bind=engine)
+    # Base.metadata.create_all(bind=engine)
 
     # Base.metadata.drop_all(bind=engine, tables=[OrganizationSource.__table__])
