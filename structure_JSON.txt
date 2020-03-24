@@ -6,7 +6,7 @@ Request structure:
     "send": false,
     "contact-data": [
 		{
-            "contact-source-most-recent": "SourceTurbines",
+            "contact-source-most-recent": "CONTACT SOURCE MOST RECENT",
             "mobile": "8795648752",
             "mailing-postal-code": "28140-1513",
             "language": "EN",
@@ -20,19 +20,19 @@ Request structure:
             "country-code": "US",
             "mailing-city": "Walkerfurt",
             "data-processing": "Processor",
-            "mailing-street": "Jeanette Viaduct",
-            "heroku-cms-processing": "Shop Solar Registration Process",
-            "form-name": "Shop Solar Registration Process",
-            "campaign-most-recent": "Shop Solar Registration Process",
+            "mailing-street": "MAIN",
+            "heroku-cms-processing": "PROCESSING",
+            "form-name": "FORM NAME",
+            "campaign-most-recent": "CAMPIGN MOST RECENT",
             "dealer-code": "",
             "email-opt-in-status": "Seen",
             "sms-opt-in-status": "Seen",
             "crmi-master-contact-id": "",
             "data-use-purpose": "DL",
             "ingestion-point": "Solar",
-            "contact-source-most-recent-details": "Shop Solar Registration Process",
+            "contact-source-most-recent-details": "SOURCE MOST RECENT DETAILS",
             "phone": "2345678902",
-            "company-name": "Mcmahon-Young",
+            "company-name": "COMPANY NAME",
             "source-id": "lynn.c@test.com",
             "change-email": false,
             "old-email": "",
@@ -46,7 +46,7 @@ Request structure:
 			"campaign": "",
 			"client-id":"10003",
 			"mailing-country":"US",
-			"source-detail":"SolarTurbines",
+			"source-detail":"SOURCE DETAILS",
 			"return-contact-id": false
         }
     ],
@@ -57,8 +57,8 @@ Request structure:
                 "ContactAttributes": {
                     "SubscriberAttributes": {
                         "Country": "Indonesia",
-                        "SubscriberKey": "XuLpZycrXA",
-                        "EmailAddress": "olsonshawn@smith.com",
+                        "SubscriberKey": "TEST",
+                        "EmailAddress": "TEST@email.com",
                         "promo-code": "0720974",
                         "name-first": "Veronica",
                         "contactsource": "Jasonbury",
@@ -73,8 +73,8 @@ Request structure:
         }
     },
     "sfmc-details": {
-        "client-secret": "xym7reBWYRZ0QM4G",
-        "client-id": "ikue2O9EHu1hkF6O",
-        "sub-domain": "1qVpty1MZxmTWb4e"
+        "client-secret": "CLIENT SECRET",
+        "client-id": "CLIENT ID",
+        "sub-domain": "SUB DOMAIN"
     }
 }"
