@@ -380,7 +380,7 @@ class ContactPointConsent(Base):
     sms_data_use_purpose__c = Column(String(255))
 
 
-engine = create_engine("sqlite:///hcms_db", echo=True)
+engine = create_engine("sqlite:///contact_database", echo=True)
 
 
 if __name__ == "__main__":

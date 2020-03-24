@@ -1,93 +1,6 @@
 from contact_model_engine import *
 from contact_utility import *
 
-# REQUIRED FIELDS
-def app_required_fields():
-    """-----------------------------------------------------------  
-    Description: This tuple determines the required fields for app
-    Argument: 
-    Return: Tuple
-    -----------------------------------------------------------"""
-    is_app_required_fields = (
-        # "campaign_most_recent__c",
-        # "client_id__c",
-        # "company_name__c",
-        # "contact_source_most_recent__c",
-        # "data_processing__c",
-        # "dealer_code__c",
-        "email__c",
-        "email_consent_date__c",
-        "email_opt_in_status__c",
-        "first_name__c",
-        # "heroku_cms_processing__c",
-        # "ingestion_point__c",
-        "last_name__c",
-        # "phone__c",
-        # "state_code__c",
-    )
-    return is_app_required_fields
-
-
-# REQUIRED FIELDS
-def dealer_required_fields():
-    """-----------------------------------------------------------  
-    Description: This tuple determines the required fields
-    Argument: 
-    Return: Tuple
-    -----------------------------------------------------------"""
-    is_dealer_required_fields = (
-        # "billing_zip_postal_code__c",
-        # "billingcity__c",
-        # "billingcountry__c",
-        # "billingstate_province__c",
-        # "billingstreet__c",
-        # "campaign_most_recent__c",
-        # "campign__c",
-        # "client_id__c",
-        # "company_name__c",
-        # "contact_source_most_recent__c",
-        # "data_processing__c",
-        "dealer_code__c",
-        "email__c",
-        # "dealer_customer_number__c",
-        # "email_consent_date__c",
-        # "email_opt_in_status__c",
-        "first_name__c",
-        # "heroku_cms_processing__c",
-        # "ingestion_point__c",
-        "last_name__c",
-        # "phone__c",
-        # "state_code__c",
-    )
-    return is_dealer_required_fields
-
-
-# REQUIRED FIELDS
-def salesforce_org_required_fields():
-    """-----------------------------------------------------------  
-    Description: This tuple determines the required fields
-    Argument: 
-    Return: Tuple
-    -----------------------------------------------------------"""
-    is_salesforce_org_required_fields = (
-        # "campaign_most_recent__c",
-        # "client_id__c",
-        # "company_name__c",
-        # "contact_source_most_recent__c",
-        # "data_processing__c",
-        # "dealer_code__c",
-        "email__c",
-        # "email_consent_date__c",
-        # "email_opt_in_status__c",
-        "first_name__c",
-        # "heroku_cms_processing__c",
-        # "ingestion_point__c",
-        "last_name__c",
-        # "phone__c",
-        # "state_code__c",
-    )
-    return is_salesforce_org_required_fields
-
 
 # REQUIRED FIELDS
 def client_type_required_fields(stage_contact):
@@ -128,8 +41,8 @@ def required_field_validator(session, obj):
         if is_empty(object_as_dict(obj).get(rf)):
             required_errors.append(rf)
     if len(required_errors) > 0:
-        rfv["HAS_ERROR"] = True
-        rfv["ERROR_FIELDS"] = required_errors
+        rfv[HAS_ERROR] = True
+        rfv[ERROR_FIELDS] = required_errors
     return rfv
 
 
@@ -144,7 +57,7 @@ def validate_email_fields(session, stage_contacts):
     for sc in stage_contacts:
         sc.process_status__c = "EMAIL FIELDS"
         if sc.change_email__c == True and is_empty(sc.old_email__c):
-            sc.status__c = "FAILED"
+            sc.status__c = FAILED
             sc.error_message__c = "REQUIRED FIELDS MISSING : old_email__c"
 
         session.add(sc)
@@ -164,10 +77,10 @@ def validate_mobile_fields(session, stage_contacts):
         sc.process_status__c = "MOBILE FIELDS"
         if not is_empty(sc.mobile__c):
             if is_empty(sc.sms_consent_date__c):
-                sc.status__c = "FAILED"
+                sc.status__c = FAILED
                 sc.error_message__c = " sms_consent_date__c,"
             if is_empty(sc.sms_data_use_purpose__c):
-                sc.status__c = "FAILED"
+                sc.status__c = FAILED
                 sc.error_message__c += " sms_consent_date__c,"
             if not is_empty(sc.error_message__c):
                 sc.error_message__c = "REQUIRED FIELDS MISSING : " + sc.error_message__c
@@ -187,15 +100,15 @@ def validate_required_fields(session, stage_contacts):
     rfv = dict()
     for sc in stage_contacts:
         rfv = required_field_validator(session, sc)
-        sc.process_status__c = "REQUIRED FIELDS"
-        if rfv.get("HAS_ERROR"):
-            sc.status__c = "FAILED"
+        sc.process_status__c = REQUIRED_FIELDS
+        if rfv.get(HAS_ERROR):
+            sc.status__c = FAILED
             sc.error_message__c = "REQUIRED FIELDS MISSING : {}".format(
-                ", ".join(rfv.get("ERROR_FIELDS"))
+                ", ".join(rfv.get())
             )
             session.add(sc)
         else:
-            sc.status__c = "IN PROGRESS"
+            sc.status__c = IN_PROGRESS
             session.add(sc)
     if session.dirty:
         dml_stage_contact(session)
@@ -229,7 +142,7 @@ def update_stage_contact_with_org_source(session, stage_contacts, org_dict):
             sc.is_separate_contact__c = org_dict.get(
                 sc.client_id__c
             ).is_separate_contact__c
-            sc.process_status__c = "ORG SOURCE"
+            sc.process_status__c = ORG SOURCE
             sc.source_contact_record_type_id__c = org_dict.get(
                 sc.client_id__c
             ).source_contact_record_type_id__c
@@ -237,12 +150,12 @@ def update_stage_contact_with_org_source(session, stage_contacts, org_dict):
                 sc.client_id__c
             ).generic_record_type_id__c
             sc.source_name__c = org_dict.get(sc.client_id__c).source_name__c
-            sc.status__c = "IN PROGRESS"
+            sc.status__c = IN_PROGRESS
             session.add(sc)
         else:
-            sc.process_status__c = "ORG SOURCE"
-            sc.status__c = "FAILED"
-            sc.error_message__c = "CLIENT DOES NOT EXIST"
+            sc.process_status__c = ORG SOURCE
+            sc.status__c = FAILED
+            sc.error_message__c = CLIENT_DOES_NOT_EXIST
             session.add(sc)
     if session.dirty:
         dml_stage_contact(session)
