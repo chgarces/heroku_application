@@ -97,7 +97,7 @@ def get_unique_id():
     Argument: 
     Return: unique id
     -----------------------------------------------------------"""
-    print("CHECK get_unique_id")
+    # print("CHECK get_unique_id")
     return uuid4().hex[:18]
 
 
@@ -126,7 +126,7 @@ def add_objects_to_session(session, obj_list):
     Argument: (1)session (2)list of objects
     Return: session
     -----------------------------------------------------------"""
-    print("CHECK add_objects_to_session")
+    # print("CHECK add_objects_to_session")
     for obj in obj_list:
         session.add(obj)
 
@@ -157,7 +157,7 @@ def create_dictionary(objects):
     Argument:(1)list of objects
     Return: dictionary with the [key]=stage_contact_id_ext__c [value]=obj
     -----------------------------------------------------------"""
-    print("CHECK create_dictionary")
+    # print("CHECK create_dictionary")
     sc_dict = dict()
     for obj in objects:
         sc_dict[obj.stage_contact_id_ext__c] = obj
@@ -171,7 +171,7 @@ def create_dictionary_list(objects):
     Argument:(1)list of objects
     Return: dictionary with the [key]=stage_contact_id_ext__c [value]=[obj]
     -----------------------------------------------------------"""
-    print("CHECK create_dictionary")
+    # print("CHECK create_dictionary")
     sc_dict = dict()
     for obj in objects:
         if obj.stage_contact_id_ext__c in sc_dict.keys():
@@ -202,7 +202,7 @@ def contact_identifier_dictionary(cont_identifier_list):
     Argument:(1)list of objects
     Return: dictionary with the [key]=contact_id_ext__c [value]=[obj]
     -----------------------------------------------------------"""
-    print("CHECK contact_identifier_dictionary")
+    # print("CHECK contact_identifier_dictionary")
     contact_identifier_dict = dict()
     for ci in cont_identifier_list:
         if ci.contact_id_ext__c in contact_identifier_dict.keys():
@@ -219,7 +219,7 @@ def contact_source_dictionary(cont_source_list):
     Argument:(1)list of cont_source_list
     Return: dictionary with the [key]=contact_id_ext__c [value]=contact_source_id_ext__c
     -----------------------------------------------------------"""
-    print("CHECK contact_source_dictionary")
+    # print("CHECK contact_source_dictionary")
     contact_source_dict = dict()
     for cs in cont_source_list:
         contact_source_dict[cs.contact_id_ext__c] = cs
@@ -232,7 +232,7 @@ def contact_dictionary(cont_list):
     Argument:(1)list of contact
     Return: dictionary with the [key]=contact_id_ext__c [value]=obj
     -----------------------------------------------------------"""
-    print("CHECK contact_dictionary")
+    # print("CHECK contact_dictionary")
     cont_dict = dict()
     for c in cont_list:
         cont_dict[c.contact_id_ext__c] = c

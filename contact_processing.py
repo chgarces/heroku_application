@@ -8,7 +8,7 @@ def create_individual(sc_dict):
     Argument: (1)stage contacts dictionary
     Return: list of individual 
     -----------------------------------------------------------"""
-    print("CHECK create_individual")
+    # print("CHECK create_individual")
     ind_list = []
     for k in sc_dict.keys():
         if sc_dict.get(k).is_obfuscated__c:
@@ -26,7 +26,7 @@ def create_contact(sc_dict, ind_dict):
     Argument:  (1)stage contacts dictionary (2) individual dictionary
     Return: list of contact objects 
     -----------------------------------------------------------"""
-    print("CHECK create_contact")
+    # print("CHECK create_contact")
     cont_list = []
     for k in ind_dict.keys():
         if sc_dict.get(k).is_obfuscated__c:
@@ -51,7 +51,7 @@ def create_contact_source(sc_dict, cont_dict):
     Argument:  (1)stage contacts dictionary (2) contact dictionary
     Return: list of contact source objects 
     -----------------------------------------------------------"""
-    print("CHECK create_contact_source")
+    # print("CHECK create_contact_source")
     cont_source_list = []
     for k in cont_dict.keys():
         for c in cont_dict.get(k):
@@ -66,7 +66,7 @@ def create_contact_identifier(sc_dict, cont_dict):
     Argument:  (1)stage contacts dictionary (2) contact dictionary
     Return: list of contact source objects 
     -----------------------------------------------------------"""
-    print("CHECK create_contact_identifier")
+    # print("CHECK create_contact_identifier")
     cont_ident_list = []
     for k in cont_dict.keys():
         for c in cont_dict.get(k):
@@ -131,7 +131,7 @@ def create_contact_point_email(cont_identifier_list, sc_dict, cont_dict):
     Argument: (1)list of email contact identifiers 
     Return: list of contact point email
     -----------------------------------------------------------"""
-    print("create_contact_point_email")
+    # print("create_contact_point_email")
 
     cont_point_email_list = []
     for ci in cont_identifier_list:
@@ -152,7 +152,7 @@ def create_contact_point_phone(cont_identifier_list, sc_dict, cont_dict):
     Argument: (1)list of phone contact identifiers (2)
     Return: list of contact point phone
     -----------------------------------------------------------"""
-    print("CHECK create_contact_point_phone")
+    # print("CHECK create_contact_point_phone")
 
     cont_point_phone_list = []
     for ci in cont_identifier_list:
@@ -173,7 +173,7 @@ def create_contact_point_mobile(cont_identifier_list, sc_dict, cont_dict):
     Argument: (1)list or mobile contact identifiers (2)
     Return: list of contact point mobile
     -----------------------------------------------------------"""
-    print("CHECK create_contact_point_mobile")
+    # print("CHECK create_contact_point_mobile")
 
     cont_point_mobile_list = []
     for ci in cont_identifier_list:
@@ -248,7 +248,7 @@ def manage_create_records(session, stage_contacts):
     Argument:(1)session (2)list of stage contacts
     Return: 
     -----------------------------------------------------------"""
-    print("CHECK manage_create_records")
+    # print("CHECK manage_create_records")
     sc_dict = create_dictionary(stage_contacts)
     # Individual
     ind_list = create_individual(sc_dict)
@@ -271,7 +271,6 @@ def manage_create_records(session, stage_contacts):
         contact_source_dict, contact_identifier_dict
     )
     add_objects_to_session(session, cont_sou_ident_list)
-
     # ContactPoint EMAIL
     cont_id_dict = contact_dictionary(cont_list)
     cont_ident_email_list = filter_contact_point(cont_identifier_list, EMAIL)
@@ -279,33 +278,28 @@ def manage_create_records(session, stage_contacts):
         cont_ident_email_list, sc_dict, cont_id_dict
     )
     add_objects_to_session(session, cont_point_email_list)
-
     # ContactPoint MOBILE
     cont_ident_mobile_list = filter_contact_point(cont_identifier_list, MOBILE)
     cont_point_mobile_list = create_contact_point_mobile(
         cont_ident_mobile_list, sc_dict, cont_id_dict
     )
     add_objects_to_session(session, cont_point_mobile_list)
-
     # ContactPoints PHONE
     cont_ident_phone_list = filter_contact_point(cont_identifier_list, PHONE)
     cont_point_phone_list = create_contact_point_phone(
         cont_ident_phone_list, sc_dict, cont_id_dict
     )
     add_objects_to_session(session, cont_point_phone_list)
-
     # MOBILE CONSENT
     mobile_consent_list = create_contact_consent_mobile(
         cont_point_mobile_list, sc_dict, cont_id_dict
     )
     add_objects_to_session(session, mobile_consent_list)
-
     # EMAIL CONSENT
     email_consent_list = create_contact_consent_email(
         cont_point_email_list, sc_dict, cont_id_dict
     )
     add_objects_to_session(session, email_consent_list)
-
     # PHONE CONSENT
     phone_consent_list = create_contact_consent_phone(
         cont_point_phone_list, sc_dict, cont_id_dict
@@ -319,6 +313,7 @@ def manage_create_records(session, stage_contacts):
         dml_stage_contact(session)
 
 
+# TODO VALIDATE THE RECORD MAPPING AND CREATION
 # MAIN
 if __name__ == "__main__":
     session = loadSession()

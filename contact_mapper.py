@@ -88,7 +88,7 @@ def generic_contact(stage_contact, ind_id):
     Argument:  (1)stage contact obj (2) individual id
     Return: contact object 
     -----------------------------------------------------------"""
-    print("CHECK generic_contact")
+    # print("CHECK generic_contact")
     c = Contact()
 
     # TODO Consent level summary
@@ -135,7 +135,7 @@ def source_contact(stage_contact, ind_id):
     Argument:  (1)stage contact obj (2) individual id
     Return: contact object 
     -----------------------------------------------------------"""
-    print("CHECK source_contact")
+    # print("CHECK source_contact")
     c = Contact()
 
     # TODO Consent level summary
@@ -182,7 +182,7 @@ def obfuscated_contact(stage_contact, ind_id):
     Argument:  (1)stage contact obj (2) individual id
     Return: contact object 
     -----------------------------------------------------------"""
-    print("CHECK obfuscated_contact")
+    # print("CHECK obfuscated_contact")
     c = Contact()
 
     c.bu_name__c = stage_contact.bu_name__c
@@ -211,7 +211,7 @@ def contact_source(stage_contact, cont_id):
     Argument:  (1)stage contact
     Return: contact source object 
     -----------------------------------------------------------"""
-    print("CHECK contact_source")
+    # print("CHECK contact_source")
     cs = ContactSource()
 
     # TODO
@@ -272,7 +272,7 @@ def email_identifier(stage_contact, contact):
     Argument:  (1)stage contacts dictionary (2) contact id
     Return: Email contact identifier object
     -----------------------------------------------------------"""
-    print("CHECK email_identifier")
+    # print("CHECK email_identifier")
     ci = ContactIdentifier()
 
     ci.identifier_type__c = COMMUNICATION_CHANNEL
@@ -300,7 +300,7 @@ def mobile_identifier(stage_contact, contact):
     Argument:  (1)stage contacts dictionary (2) contact id
     Return: Mobile contact identifier object
     -----------------------------------------------------------"""
-    print("CHECK phone_identifier")
+    # print("CHECK phone_identifier")
     ci = ContactIdentifier()
 
     ci.Identifier__c = stage_contact.mobile__c
@@ -328,7 +328,7 @@ def phone_identifier(stage_contact, contact):
     Argument:  (1)stage contacts dictionary (2) contact id
     Return: Phone contact identifier object
     -----------------------------------------------------------"""
-    print("CHECK phone_identifier")
+    # print("CHECK phone_identifier")
     ci = ContactIdentifier()
 
     ci.Identifier__c = stage_contact.mobile__c
@@ -356,7 +356,7 @@ def master_identifier(stage_contact, contact):
     Argument:  (1)stage contacts dictionary (2) contact id
     Return: CRMI Id contact identifier object
     -----------------------------------------------------------"""
-    print("CHECK master_identifier")
+    # print("CHECK master_identifier")
     ci = ContactIdentifier()
 
     ci.status_source__c = stage_contact.source_name__c
@@ -382,7 +382,7 @@ def source_id_identifier(stage_contact, contact):
     Argument:  (1)stage contacts dictionary (2) contact id
     Return: Source Id contact identifier object
     -----------------------------------------------------------"""
-    print("CHECK source_id_identifier")
+    # print("CHECK source_id_identifier")
     ci = ContactIdentifier()
 
     ci.identifier_type__c = SALESFORCE_ID
@@ -405,7 +405,7 @@ def dealer_code_identifier(stage_contact, contact):
     Argument:  (1)stage contacts dictionary (2) contact id
     Return: Dealer contact identifier object  
     -----------------------------------------------------------"""
-    print("CHECK dealer_code_identifier")
+    # print("CHECK dealer_code_identifier")
     ci = ContactIdentifier()
 
     ci.identifier_type__c = OTHER_IDENTIFIER
@@ -431,7 +431,7 @@ def dealer_customer_number_identifier(stage_contact, contact):
     Argument:  (1)stage contacts dictionary (2) contact id
     Return: dealer customer number contact identifier object
     -----------------------------------------------------------"""
-    print("CHECK dealer_code_identifier")
+    # print("CHECK dealer_code_identifier")
     ci = ContactIdentifier()
 
     ci.identifier_type__c = OTHER_IDENTIFIER
@@ -475,8 +475,8 @@ def contact_point_email(cont_ident, stage_contact, contact):
     Return: Contact Point Email object
     -----------------------------------------------------------"""
 
-    # print("CHECK stage_contact {}".format(stage_contact))
-    # print("CHECK contact {}".format(contact))
+    # # print("CHECK stage_contact {}".format(stage_contact))
+    # # print("CHECK contact {}".format(contact))
 
     cpe = ContactPointEmail()
 

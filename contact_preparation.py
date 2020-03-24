@@ -36,7 +36,7 @@ def required_field_validator(obj):
     Argument: (1)session (2)object
     Return: dict with error and fields that error 
     -----------------------------------------------------------"""
-    print("CHECK required_field_validator")
+    # print("CHECK required_field_validator")
     required_errors = []
     rfv = dict()
     for rf in client_type_required_fields(obj):
@@ -56,7 +56,7 @@ def validate_email_fields(session, stage_contacts):
     Argument: (1)session (2)list of stage contacts
     Return: 
     -----------------------------------------------------------"""
-    print("CHECK validate_email_fields")
+    # print("CHECK validate_email_fields")
     for sc in stage_contacts:
         sc.process_status__c = "EMAIL FIELDS"
         if sc.change_email__c == True and is_empty(sc.old_email__c):
@@ -75,7 +75,7 @@ def validate_mobile_fields(session, stage_contacts):
     Argument: (1)session (2)list of stage contacts
     Return: 
     -----------------------------------------------------------"""
-    print("CHECK validate_mobile_fields")
+    # print("CHECK validate_mobile_fields")
     for sc in stage_contacts:
         sc.process_status__c = "MOBILE FIELDS"
         if not is_empty(sc.mobile__c):
@@ -99,7 +99,7 @@ def validate_required_fields(session, stage_contacts):
     Argument: (1)session (2)list of stage contacts 
     Return: 
     -----------------------------------------------------------"""
-    print("CHECK validate_stage_contacts")
+    # print("CHECK validate_stage_contacts")
     rfv = dict()
     for sc in stage_contacts:
         rfv = required_field_validator(sc)
@@ -124,7 +124,7 @@ def update_stage_contact_with_org_source(session, stage_contacts, org_dict):
     Argument: (1)session (2)list of stage contacts (3)org source dictionary
     Return: 
     -----------------------------------------------------------"""
-    print("CHECK update_stage_contact_with_org_source")
+    # print("CHECK update_stage_contact_with_org_source")
     stage_contact_list = []
     for sc in stage_contacts:
         stage_contact_list.append(organization_source(sc, org_dict))
@@ -140,7 +140,7 @@ def query_stage_contacts(session, query_limit, **kwargs):
     Argument: (1)session (2)integer for query limit (3)query filters
     Return: list of org source objects 
     -----------------------------------------------------------"""
-    print("CHECK query_stage_contacts")
+    # print("CHECK query_stage_contacts")
     try:
         q = session.query(StageContact)
         for key, value in kwargs.items():
@@ -152,7 +152,7 @@ def query_stage_contacts(session, query_limit, **kwargs):
         print("THERE WAS AN ERROR WHILE QUERYING STAGE CONTACTS")
 
     # for sc in stage_contacts:
-    #     print("CHECK SC {}".format(sc.process_status__c))
+    #     # print("CHECK SC {}".format(sc.process_status__c))
     return stage_contacts
 
 
@@ -163,7 +163,7 @@ def query_organization_source(session, query_limit, **kwargs):
     Argument: (1)session (2)integer for query limit (3)query filters
     Return: list of org source objects 
     -----------------------------------------------------------"""
-    print("CHECK query_organization_source")
+    # print("CHECK query_organization_source")
     try:
         q = session.query(OrganizationSource)
         for key, value in kwargs.items():
@@ -175,7 +175,7 @@ def query_organization_source(session, query_limit, **kwargs):
         print("THERE WAS AN ERROR WHILE QUERYING ORG SOURCES")
 
     # for org in organization_sources:
-    #     print("CHECK ORG {}".format(org.client_id__c))
+    #     # print("CHECK ORG {}".format(org.client_id__c))
     return organization_sources
 
 
@@ -186,7 +186,7 @@ def organization_source_dictionary(organization_sources):
     Argument:(1)list of organization source
     Return: dictionary with the [key]=client_id [value]=obj
     -----------------------------------------------------------"""
-    print("CHECK organization_source")
+    # print("CHECK organization_source")
     org_dict = dict()
 
     for org in organization_sources:
