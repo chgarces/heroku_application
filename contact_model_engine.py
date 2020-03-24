@@ -60,7 +60,7 @@ class ContactPointConsent(Base):
     __table_args__ = {"autoload": True}
 
 
-# # ----------------------------------------------------------------------
+# SESSION
 def loadSession():
 
     metadata = Base.metadata

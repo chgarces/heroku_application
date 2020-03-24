@@ -1,7 +1,7 @@
 from contact_model_engine import *
 from contact_utility import *
+from contact_variables import *
 from datetime import datetime
-
 
 # CREATION INDIVIDUAL
 def generic_individual(stage_contact):
@@ -27,8 +27,8 @@ def obfuscated_individual(stage_contact):
     Return: Individual Object 
     -----------------------------------------------------------"""
     ind = Individual()
-    ind.firstname = stage_contact.source_name__c + "FirstName"
-    ind.lastname = stage_contact.source_name__c + "LastName"
+    ind.firstname = stage_contact.source_name__c + FIRSTNAME
+    ind.lastname = stage_contact.source_name__c + LASTNAME
     ind.individual_id_ext__c = get_unique_id()
     ind.stage_contact_id_ext__c = stage_contact.stage_contact_id_ext__c
 
@@ -67,7 +67,7 @@ def generic_contact(stage_contact, ind_id):
     c.mailingpostalcode = stage_contact.mailingpostalcode
     c.mailingstatecode = stage_contact.mailingstatecode
     c.mailingstreet = stage_contact.mailingstreet
-    c.matmowner__c = "Caterpillar"
+    c.matmowner__c = CATERPILLAR
     c.mobile = stage_contact.mobile__c
     c.original_ingestion_point__c = stage_contact.original_ingestion_point__c
     c.product_of_interest__c = stage_contact.product_of_interest__c
@@ -75,7 +75,7 @@ def generic_contact(stage_contact, ind_id):
     c.purchase_timeframe__c = stage_contact.purchase_timeframe__c
     c.recordtypeid = stage_contact.generic_record_type_id__c
     c.stage_contact_id_ext__c = stage_contact.stage_contact_id_ext__c
-    c.status__c = "Active"
+    c.status__c = ACTIVE
 
     return c
 
@@ -120,7 +120,7 @@ def source_contact(stage_contact, ind_id):
     c.purchase_timeframe__c = stage_contact.purchase_timeframe__c
     c.recordtypeid = stage_contact.generic_record_type_id__c
     c.stage_contact_id_ext__c = stage_contact.stage_contact_id_ext__c
-    c.status__c = "Active"
+    c.status__c = ACTIVE
 
     return c
 
@@ -138,11 +138,11 @@ def obfuscated_contact(stage_contact, ind_id):
     c.bu_name__c = stage_contact.bu_name__c
     c.email = (
         "{}".format(stage_contact.source_id__c)
-        + "@"
+        + AT
         + "{}".format(stage_contact.source_name__c)
     )
-    c.firstname = stage_contact.source_name__c + "FirstName"
-    c.lastname = stage_contact.source_name__c + "LastName"
+    c.firstname = stage_contact.source_name__c + FIRSTNAME
+    c.lastname = stage_contact.source_name__c + LASTNAME
     c.contact_id_ext__c = get_unique_id()
     c.recordtypeid = stage_contact.source_contact_record_type_id__c
     c.stage_contact_id_ext__c = stage_contact.stage_contact_id_ext__c
@@ -191,16 +191,16 @@ def contact_source(stage_contact, cont_id):
     c.original_ingestion_point__c = stage_contact.original_ingestion_point__c
     c.phone__c = stage_contact.phone__c
     c.processed_date__c = datetime.utcnow()
-    c.processed_details__c = "HCMS Processed"
-    c.processed_status__c = "Processed"
+    c.processed_details__c = TEST_PROCESSED
+    c.processed_status__c = PROCESSED
     c.product_of_interest__c = stage_contact.product_of_interest__c
     c.product_of_interest_text__c = stage_contact.product_of_interest_text__c
     c.purchase_timeframe__c = stage_contact.purchase_timeframe__c
     c.sms_consent_date__c = stage_contact.sms_consent_date__c
     c.sms_opt_in_status__c = stage_contact.sms_opt_in_status__c
     c.source_date_created__c = datetime.utcnow()
-    c.source_status__c = "Active"
-    c.status__c = "Active"
+    c.source_status__c = ACTIVE
+    c.status__c = ACTIVE
     cs.contact_id_ext__c = cont_id
     cs.contact_source_id_ext__c = get_unique_id()
     cs.stage_contact_id_ext__c = stage_contact.stage_contact_id_ext__c
@@ -219,14 +219,14 @@ def email_identifier(stage_contact, contact):
     ci = ContactIdentifier()
 
     ci.contact_id_ext__c = contact.contact_id_ext__c
-    ci.identifier_type__c = "Comunication Channel"
-    ci.identifier_group__c = "Email"
+    ci.identifier_type__c = COMMUNICATION CHANNEL
+    ci.identifier_group__c = EMAIL
     ci.Identifier__c = stage_contact.email__c
     ci.contact_identifier_id_ext__c = get_unique_id()
     ci.status_time__c = stage_contact.email_consent_date__c
-    ci.status__c = "Active"
+    ci.status__c = ACTIVE
     ci.matm_owner__c = contact.matm_owner__c
-    ci.status_reason__c = "New Contact Created"
+    ci.status_reason__c = NEW CONTACT CREATED
     ci.status_source__c = stage_contact.contact_source__c
     ci.last_known_activity__c = datetime.utcnow()
     ci.stage_contact_id_ext__c = stage_contact.stage_contact_id_ext__c
@@ -248,13 +248,13 @@ def mobile_identifier(stage_contact, contact):
     ci.Identifier__c = stage_contact.mobile__c
     ci.contact_id_ext__c = contact.contact_id_ext__c
     ci.contact_identifier_id_ext__c = get_unique_id()
-    ci.identifier_group__c = "Mobile"
-    ci.identifier_type__c = "Comunication Channel"
+    ci.identifier_group__c = MOBILE
+    ci.identifier_type__c = COMMUNICATION CHANNEL
     ci.last_known_activity__c = datetime.utcnow()
     ci.matm_owner__c = contact.matm_owner__c
     ci.stage_contact_id_ext__c = stage_contact.stage_contact_id_ext__c
-    ci.status__c = "Active"
-    ci.status_reason__c = "New Contact Created"
+    ci.status__c = ACTIVE
+    ci.status_reason__c = 
     ci.status_source__c = stage_contact.contact_source__c
     ci.status_time__c = stage_contact.email_consent_date__c
 
@@ -275,13 +275,13 @@ def phone_identifier(stage_contact, contact):
     ci.Identifier__c = stage_contact.mobile__c
     ci.contact_id_ext__c = contact.contact_id_ext__c
     ci.contact_identifier_id_ext__c = get_unique_id()
-    ci.identifier_group__c = "Phone"
-    ci.identifier_type__c = "Comunication Channel"
+    ci.identifier_group__c = PHONE
+    ci.identifier_type__c = COMMUNICATION CHANNEL
     ci.last_known_activity__c = datetime.utcnow()
     ci.matm_owner__c = contact.matm_owner__c
     ci.stage_contact_id_ext__c = stage_contact.stage_contact_id_ext__c
-    ci.status__c = "Active"
-    ci.status_reason__c = "New Contact Created"
+    ci.status__c = ACTIVE
+    ci.status_reason__c = NEW CONTACT CREATED
     ci.status_source__c = stage_contact.contact_source__c
     ci.status_time__c = stage_contact.email_consent_date__c
 
@@ -301,11 +301,11 @@ def master_identifier(stage_contact, contact):
     # TODO MATMOWNER
     ci.status_source__c = stage_contact.contact_source__c
     ci.contact_id_ext__c = contact.contact_id_ext__c
-    ci.identifier_type__c = "Salesforce ID"
-    ci.identifier_group__c = "CRMI Master Contact ID"
+    ci.identifier_type__c = SALESFORCE_ID
+    ci.identifier_group__c = CRMI_MASTER_CONTACT_ID
     ci.contact_identifier_id_ext__c = get_unique_id()
-    ci.status__c = "Active"
-    ci.status_reason__c = "New Contact Created"
+    ci.status__c = ACTIVE
+    ci.status_reason__c = NEW CONTACT CREATED
     ci.stage_contact_id_ext__c = stage_contact.stage_contact_id_ext__c
     ci.matm_owner__c = contact.matm_owner__c
     ci.last_known_activity__c = datetime.utcnow()
@@ -323,8 +323,8 @@ def source_id_identifier(stage_contact, contact):
     print("CHECK source_id_identifier")
     ci = ContactIdentifier()
     ci.contact_id_ext__c = contact.contact_id_ext__c
-    ci.identifier_type__c = "Salesforce ID"
-    ci.identifier_group__c = stage_contact.source_name__c + "Master Contact ID"
+    ci.identifier_type__c = SALESFORCE_ID
+    ci.identifier_group__c = stage_contact.source_name__c + MASTER_CONTACT_ID
     ci.Identifier__c = stage_contact.source_id__c
     ci.contact_identifier_id_ext__c = get_unique_id()
     ci.stage_contact_id_ext__c = stage_contact.stage_contact_id_ext__c
@@ -344,12 +344,12 @@ def dealer_code_identifier(stage_contact, contact):
     ci = ContactIdentifier()
 
     ci.contact_id_ext__c = contact.contact_id_ext__c
-    ci.identifier_type__c = "Other Identifier"
-    ci.identifier_group__c = "Dealer Code"
+    ci.identifier_type__c = OTHER_IDENTIFIER
+    ci.identifier_group__c = DEALER_CODE
     ci.Identifier__c = stage_contact.dealer_code__c
     ci.contact_identifier_id_ext__c = get_unique_id()
     ci.stage_contact_id_ext__c = stage_contact.stage_contact_id_ext__c
-    ci.status_reason__c = "New Contact Created"
+    ci.status_reason__c = NEW CONTACT CREATED
     ci.stage_contact_id_ext__c = stage_contact.stage_contact_id_ext__c
     ci.matm_owner__c = contact.matm_owner__c
     ci.last_known_activity__c = datetime.utcnow()
@@ -367,8 +367,8 @@ def dealer_customer_number_identifier(stage_contact, contact):
     print("CHECK dealer_code_identifier")
     ci = ContactIdentifier()
     ci.contact_id_ext__c = contact.contact_id_ext__c
-    ci.identifier_type__c = "Other Identifier"
-    ci.identifier_group__c = "DC+DCN"
+    ci.identifier_type__c = OTHER_IDENTIFIER
+    ci.identifier_group__c = DC_DCN
     ci.Identifier__c = (
         stage_contact.dealer_code__c + stage_contact.dealer_customer_number__c
     )
@@ -414,7 +414,7 @@ def contact_point_email(cont_ident, stage_contact, contact):
     cpe.email_status_mc__c = cont_ident.status__c
     cpe.emailmailbox = stage_contact.email__c[0 : stage_contact.email__c.find("@")]
     cpe.emaildomain = stage_contact.email__c[
-        stage_contact.email__c.find("@") + 1 : len(stage_contact.email__c)
+        stage_contact.email__c.find(AT) + 1 : len(stage_contact.email__c)
     ]
     cpe.matm_owner__c = contact.matm_owner__c
 
@@ -481,4 +481,3 @@ def email_contact_point_consent(cont_point, ind_id):
     return cpc
 
     # TODO email contact point consents!!!
-

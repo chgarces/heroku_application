@@ -1,5 +1,94 @@
 from uuid import uuid4
 
+#
+# APP REQUIRED FIELDS
+def app_required_fields():
+    """-----------------------------------------------------------  
+    Description: This tuple determines the required fields for app
+    Argument: 
+    Return: Tuple
+    -----------------------------------------------------------"""
+    app_required = (
+        # "campaign_most_recent__c",
+        # "client_id__c",
+        # "company_name__c",
+        # "contact_source_most_recent__c",
+        # "data_processing__c",
+        # "dealer_code__c",
+        "email__c",
+        "email_consent_date__c",
+        "email_opt_in_status__c",
+        "first_name__c",
+        # "heroku_cms_processing__c",
+        # "ingestion_point__c",
+        "last_name__c",
+        # "phone__c",
+        # "state_code__c",
+    )
+    return app_required
+
+
+# DEALER REQUIRED FIELDS
+def dealer_required_fields():
+    """-----------------------------------------------------------  
+    Description: This tuple determines the required fields
+    Argument: 
+    Return: Tuple
+    -----------------------------------------------------------"""
+    dealer_required = (
+        # "billing_zip_postal_code__c",
+        # "billingcity__c",
+        # "billingcountry__c",
+        # "billingstate_province__c",
+        # "billingstreet__c",
+        # "campaign_most_recent__c",
+        # "campign__c",
+        # "client_id__c",
+        # "company_name__c",
+        # "contact_source_most_recent__c",
+        # "data_processing__c",
+        "dealer_code__c",
+        "email__c",
+        # "dealer_customer_number__c",
+        # "email_consent_date__c",
+        # "email_opt_in_status__c",
+        "first_name__c",
+        # "heroku_cms_processing__c",
+        # "ingestion_point__c",
+        "last_name__c",
+        # "phone__c",
+        # "state_code__c",
+    )
+    return dealer_required
+
+
+# SALESFORCE REQUIRED FIELDS
+def salesforce_org_required_fields():
+    """-----------------------------------------------------------  
+    Description: This tuple determines the required fields
+    Argument: 
+    Return: Tuple
+    -----------------------------------------------------------"""
+    salesforce_org_required = (
+        # "campaign_most_recent__c",
+        # "client_id__c",
+        # "company_name__c",
+        # "contact_source_most_recent__c",
+        # "data_processing__c",
+        # "dealer_code__c",
+        "email__c",
+        # "email_consent_date__c",
+        # "email_opt_in_status__c",
+        "first_name__c",
+        # "heroku_cms_processing__c",
+        # "ingestion_point__c",
+        "last_name__c",
+        # "phone__c",
+        # "state_code__c",
+    )
+    return salesforce_org_required
+
+
 # GENERIC
 def get_unique_id():
     """-----------------------------------------------------------
