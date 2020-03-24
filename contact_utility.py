@@ -223,3 +223,16 @@ def contact_source_dictionary(cont_source_list):
     for cs in cont_source_list:
         contact_source_dict[cs.contact_id_ext__c] = cs
     return contact_source_dict
+
+
+def contact_dictionary(cont_list):
+    """-----------------------------------------------------------
+    Description: Will create a dictionary with a list of objects
+    Argument:(1)list of contact
+    Return: dictionary with the [key]=contact_id_ext__c [value]=obj
+    -----------------------------------------------------------"""
+    print("CHECK contact_dictionary")
+    cont_dict = dict()
+    for c in cont_list:
+        cont_dict[c.contact_id_ext__c] = c
+    return cont_dict

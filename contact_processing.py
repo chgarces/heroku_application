@@ -110,7 +110,7 @@ def create_contact_source_identifier(contact_source_dict, contact_identifier_dic
 
 
 # CREATION CONTACT POINTS
-def create_contact_points(cont_identifier_list):
+def create_contact_points(cont_identifier_list, sc_dict, cont_dict):
     """-----------------------------------------------------------
     Description: Build the contact point objects
     Argument: (1)list of contact identifiers (2)
@@ -122,39 +122,55 @@ def create_contact_points(cont_identifier_list):
     cont_point_phone_list = []
     cont_point_mobile_list = []
     for ci in cont_identifier_list:
-        if ci.identifier_group__c == "Email":
+        if ci.identifier_group__c == EMAIL:
             cont_point_email_list.append(ci)
-        if ci.identifier_group__c == "Mobile":
+        if ci.identifier_group__c == MOBILE:
             cont_point_mobile_list.append(ci)
-        if ci.identifier_group__c == "Phone":
+        if ci.identifier_group__c == PHONE:
             cont_point_phone_list.append(ci)
 
     if len(cont_point_email_list) > 0:
-        cont_point_list += create_contact_point_email(cont_point_email_list)
+        cont_point_list += create_contact_point_email(
+            cont_point_email_list, sc_dict, cont_dict
+        )
     if len(cont_point_mobile_list) > 0:
-        cont_point_list += create_contact_point_mobile(cont_point_mobile_list)
+        cont_point_list += create_contact_point_mobile(
+            cont_point_mobile_list, sc_dict, cont_dict
+        )
     if len(cont_point_phone_list) > 0:
-        cont_point_list += create_contact_point_phone(cont_point_phone_list)
+        cont_point_list += create_contact_point_phone(
+            cont_point_phone_list, sc_dict, cont_dict
+        )
 
     return cont_point_list
 
 
 # CREATION CONTACT POINT
-def create_contact_point_email(cont_identifier_list):
+def create_contact_point_email(cont_identifier_list, sc_dict, cont_dict):
     """-----------------------------------------------------------
     Description: Build the contact point email objects
     Argument: (1)list of email contact identifiers 
     Return: list of contact point email
     -----------------------------------------------------------"""
-    print("CHECK create_contact_point_email")
+    # print("CHECK create_contact_point_email")
+    # print("CHECK sc_dict {}".format(sc_dict))
+    # print("CHECK cont_dict {}".format(cont_dict))
     cont_point_email_list = []
     for ci in cont_identifier_list:
-        cont_point_email_list.append(contact_point_email(ci))
+        #     print("CHECK SC ID {}".format(ci.stage_contact_id_ext__c))
+        #     print("CHECK CONT ID {}".format(ci.contact_id_ext__c))
+        cont_point_email_list.append(
+            contact_point_email(
+                ci,
+                sc_dict.get(ci.stage_contact_id_ext__c),
+                cont_dict.get(ci.contact_id_ext__c),
+            )
+        )
     return cont_point_email_list
 
 
 # CREATION CONTACT POINT PHONE
-def create_contact_point_phone(cont_identifier_list):
+def create_contact_point_phone(cont_identifier_list, sc_dict, cont_dict):
     """-----------------------------------------------------------
     Description: Build the contact point phone objects
     Argument: (1)list of phone contact identifiers (2)
@@ -164,12 +180,18 @@ def create_contact_point_phone(cont_identifier_list):
 
     cont_point_phone_list = []
     for ci in cont_identifier_list:
-        cont_point_phone_list.append(contact_point_phone(ci))
+        cont_point_phone_list.append(
+            contact_point_email(
+                ci,
+                sc_dict.get(ci.stage_contact_id_ext__c),
+                cont_dict.get(ci.contact_id_ext__c),
+            )
+        )
     return cont_point_phone_list
 
 
 # CREATION CONTACT POINT MOBILE
-def create_contact_point_mobile(cont_identifier_list):
+def create_contact_point_mobile(cont_identifier_list, sc_dict, cont_dict):
     """-----------------------------------------------------------
     Description: Build the contact point mobile objects
     Argument: (1)list or mobile contact identifiers (2)
@@ -179,7 +201,13 @@ def create_contact_point_mobile(cont_identifier_list):
 
     cont_point_mobile_list = []
     for ci in cont_identifier_list:
-        cont_point_mobile_list.append(contact_point_mobile(ci))
+        cont_point_mobile_list.append(
+            contact_point_email(
+                ci,
+                sc_dict.get(ci.stage_contact_id_ext__c),
+                cont_dict.get(ci.contact_id_ext__c),
+            )
+        )
     return cont_point_mobile_list
 
 
@@ -233,8 +261,10 @@ def manage_create_records(session, stage_contacts):
     )
     add_objects_to_session(session, cont_sou_ident_list)
     # ContactPoint
-    cont_point_list = create_contact_points(cont_identifier_list)
+    cont_id_dict = contact_dictionary(cont_list)
+    cont_point_list = create_contact_points(cont_identifier_list, sc_dict, cont_id_dict)
     add_objects_to_session(session, cont_point_list)
+
     # ContactPointConsent
     cont_consent_list = create_contact_point_consent(cont_point_list, sc_dict, ind_dict)
     add_objects_to_session(session, cont_consent_list)

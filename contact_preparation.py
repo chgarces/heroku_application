@@ -1,5 +1,6 @@
 from contact_model_engine import *
 from contact_utility import *
+from contact_variables import *
 
 #
 # REQUIRED FIELDS
@@ -142,7 +143,7 @@ def update_stage_contact_with_org_source(session, stage_contacts, org_dict):
             sc.is_separate_contact__c = org_dict.get(
                 sc.client_id__c
             ).is_separate_contact__c
-            sc.process_status__c = ORG SOURCE
+            sc.process_status__c = ORG_SOURCE
             sc.source_contact_record_type_id__c = org_dict.get(
                 sc.client_id__c
             ).source_contact_record_type_id__c
@@ -153,7 +154,7 @@ def update_stage_contact_with_org_source(session, stage_contacts, org_dict):
             sc.status__c = IN_PROGRESS
             session.add(sc)
         else:
-            sc.process_status__c = ORG SOURCE
+            sc.process_status__c = ORG_SOURCE
             sc.status__c = FAILED
             sc.error_message__c = CLIENT_DOES_NOT_EXIST
             session.add(sc)

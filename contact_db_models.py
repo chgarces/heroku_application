@@ -387,14 +387,14 @@ if __name__ == "__main__":
 
     # Base.metadata.drop_all(bind=engine, tables=[StageContact.__table__])
 
-    Base.metadata.drop_all(bind=engine, tables=[Individual.__table__])
-    Base.metadata.drop_all(bind=engine, tables=[Contact.__table__])
-    Base.metadata.drop_all(bind=engine, tables=[ContactIdentifier.__table__])
-    Base.metadata.drop_all(bind=engine, tables=[ContactSource.__table__])
-    Base.metadata.drop_all(bind=engine, tables=[ContactSourceIdentifier.__table__])
-    Base.metadata.drop_all(bind=engine, tables=[ContactPointEmail.__table__])
-    Base.metadata.drop_all(bind=engine, tables=[ContactPointPhone.__table__])
-    Base.metadata.drop_all(bind=engine, tables=[ContactPointConsent.__table__])
-    # Base.metadata.create_all(bind=engine)
+    # Base.metadata.drop_all(bind=engine, tables=[Individual.__table__])
+    # Base.metadata.drop_all(bind=engine, tables=[Contact.__table__])
+    # Base.metadata.drop_all(bind=engine, tables=[ContactIdentifier.__table__])
+    # Base.metadata.drop_all(bind=engine, tables=[ContactSource.__table__])
+    # Base.metadata.drop_all(bind=engine, tables=[ContactSourceIdentifier.__table__])
+    # Base.metadata.drop_all(bind=engine, tables=[ContactPointEmail.__table__])
+    # Base.metadata.drop_all(bind=engine, tables=[ContactPointPhone.__table__])
+    # Base.metadata.drop_all(bind=engine, tables=[ContactPointConsent.__table__])
+    Base.metadata.create_all(bind=engine)
 
     # Base.metadata.drop_all(bind=engine, tables=[OrganizationSource.__table__])
