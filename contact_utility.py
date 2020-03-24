@@ -134,13 +134,13 @@ def add_objects_to_session(session, obj_list):
 
 
 # GENERIC
-def dml_stage_contact(session):
+def dml_records(session):
     """-----------------------------------------------------------
     Description: Manage DML operation in the database
     Argument: db session
     Return: 
     -----------------------------------------------------------"""
-    print("CHECK dml_stage_contact")
+    print("CHECK dml_records")
     try:
         session.commit()
         # TODO: CATCH ERRORS

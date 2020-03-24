@@ -307,10 +307,10 @@ def manage_create_records(session, stage_contacts):
     add_objects_to_session(session, phone_consent_list)
 
     if session.new:
-        dml_stage_contact(session)
+        dml_submit_to_database(session)
         # update StageContacts status
         add_objects_to_session(session, update_stage_contacts(stage_contacts))
-        dml_stage_contact(session)
+        dml_submit_to_database(session)
 
 
 # TODO VALIDATE THE RECORD MAPPING AND CREATION
