@@ -109,38 +109,17 @@ def create_contact_source_identifier(contact_source_dict, contact_identifier_dic
     return cont_sou_ident_list
 
 
-# CREATION CONTACT POINTS
-def create_contact_points(cont_identifier_list, sc_dict, cont_dict):
+# CREATION CONTACT POINT
+def filter_contact_point(cont_identifier_list, filter):
     """-----------------------------------------------------------
-    Description: Build the contact point objects
-    Argument: (1)list of contact identifiers (2)
+    Description: filter contact points by type Email, Phone, and Mobile
+    Argument: (1)list of contact identifiers (2) Filter
     Return: list of contact points
     -----------------------------------------------------------"""
-    print("CHECK create_contact_points")
     cont_point_list = []
-    cont_point_email_list = []
-    cont_point_phone_list = []
-    cont_point_mobile_list = []
     for ci in cont_identifier_list:
-        if ci.identifier_group__c == EMAIL:
-            cont_point_email_list.append(ci)
-        if ci.identifier_group__c == MOBILE:
-            cont_point_mobile_list.append(ci)
-        if ci.identifier_group__c == PHONE:
-            cont_point_phone_list.append(ci)
-
-    if len(cont_point_email_list) > 0:
-        cont_point_list += create_contact_point_email(
-            cont_point_email_list, sc_dict, cont_dict
-        )
-    if len(cont_point_mobile_list) > 0:
-        cont_point_list += create_contact_point_mobile(
-            cont_point_mobile_list, sc_dict, cont_dict
-        )
-    if len(cont_point_phone_list) > 0:
-        cont_point_list += create_contact_point_phone(
-            cont_point_phone_list, sc_dict, cont_dict
-        )
+        if ci.identifier_group__c == filter:
+            cont_point_list.append(ci)
 
     return cont_point_list
 
@@ -220,7 +199,6 @@ def create_contact_point_consent(cont_point_list, sc_dict, ind_dict):
     -----------------------------------------------------------"""
     print("CHECK create_contact_point_consent")
     cont_consent_list = []
-
     for cp in cont_point_list:
         cont_consent_list.append(
             contact_point_consent(
@@ -260,14 +238,38 @@ def manage_create_records(session, stage_contacts):
         contact_source_dict, contact_identifier_dict
     )
     add_objects_to_session(session, cont_sou_ident_list)
-    # ContactPoint
+    # ContactPoints
+    cont_point_email_list = []
+    cont_point_phone_list = []
+    cont_point_mobile_list = []
+    # ContactPoints EMAIL
     cont_id_dict = contact_dictionary(cont_list)
-    cont_point_list = create_contact_points(cont_identifier_list, sc_dict, cont_id_dict)
-    add_objects_to_session(session, cont_point_list)
+    cont_ident_email_list = filter_contact_point(cont_identifier_list, EMAIL)
+    if len(cont_ident_email_list) > 0:
+        cont_point_email_list = create_contact_point_email(
+            cont_ident_email_list, sc_dict, cont_id_dict
+        )
+        add_objects_to_session(session, cont_point_email_list)
+    # ContactPoints MOBILE
+    cont_ident_mobile_list = filter_contact_point(cont_identifier_list, MOBILE)
+    if len(cont_ident_mobile_list) > 0:
+        cont_point_mobile_list = create_contact_point_mobile(
+            cont_ident_mobile_list, sc_dict, cont_id_dict
+        )
+        add_objects_to_session(session, cont_point_mobile_list)
+    # ContactPoints PHONE
+    cont_ident_phone_list = filter_contact_point(cont_identifier_list, PHONE)
+    if len(cont_ident_phone_list) > 0:
+        cont_point_phone_list = create_contact_point_phone(
+            cont_ident_phone_list, sc_dict, cont_id_dict
+        )
+        add_objects_to_session(session, cont_point_phone_list)
+
+    # add_objects_to_session(session, cont_point_list)
 
     # ContactPointConsent
-    cont_consent_list = create_contact_point_consent(cont_point_list, sc_dict, ind_dict)
-    add_objects_to_session(session, cont_consent_list)
+    # cont_consent_list = create_contact_point_consent(cont_point_list, sc_dict, ind_dict)
+    # add_objects_to_session(session, cont_consent_list)
 
     if session.new:
         dml_stage_contact(session)
