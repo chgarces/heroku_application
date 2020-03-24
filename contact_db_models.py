@@ -9,11 +9,8 @@ from sqlalchemy import (
     DateTime,
     Date,
     MetaData,
-    Enum,
 )
 from sqlalchemy.ext.declarative import declarative_base
-
-# from sqlalchemy.exc import OperationalError
 
 Base = declarative_base()
 
