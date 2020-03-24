@@ -70,38 +70,24 @@ def create_contact_identifier(sc_dict, cont_dict):
     cont_ident_list = []
     for k in cont_dict.keys():
         for c in cont_dict.get(k):
-            cont_ident_list.append(
-                master_identifier(sc_dict.get(k), c.contact_id_ext__c)
-            )
+            cont_ident_list.append(master_identifier(sc_dict.get(k), c))
             if not is_empty(sc_dict.get(k).source_id__c):
-                cont_ident_list.append(
-                    source_id_identifier(sc_dict.get(k), c.contact_id_ext__c)
-                )
+                cont_ident_list.append(source_id_identifier(sc_dict.get(k), c))
             if not sc_dict.get(k).is_obfuscated__c:
                 if not is_empty(sc_dict.get(k).email__c):
-                    cont_ident_list.append(
-                        email_identifier(sc_dict.get(k), c.contact_id_ext__c)
-                    )
+                    cont_ident_list.append(email_identifier(sc_dict.get(k), c))
                 if not is_empty(sc_dict.get(k).phone__c):
-                    cont_ident_list.append(
-                        phone_identifier(sc_dict.get(k), c.contact_id_ext__c)
-                    )
+                    cont_ident_list.append(phone_identifier(sc_dict.get(k), c))
                 if not is_empty(sc_dict.get(k).mobile__c):
-                    cont_ident_list.append(
-                        mobile_identifier(sc_dict.get(k), c.contact_id_ext__c)
-                    )
+                    cont_ident_list.append(mobile_identifier(sc_dict.get(k), c))
                 if not is_empty(sc_dict.get(k).dealer_code__c):
-                    cont_ident_list.append(
-                        dealer_code_identifier(sc_dict.get(k), c.contact_id_ext__c)
-                    )
+                    cont_ident_list.append(dealer_code_identifier(sc_dict.get(k), c))
                 if (
                     not is_empty(sc_dict.get(k).dealer_customer_number__c)
                     and sc_dict.get(k).is_dealer__c
                 ):
                     cont_ident_list.append(
-                        dealer_customer_number_identifier(
-                            sc_dict.get(k), c.contact_id_ext__c
-                        )
+                        dealer_customer_number_identifier(sc_dict.get(k), c)
                     )
 
     return cont_ident_list
