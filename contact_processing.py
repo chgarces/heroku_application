@@ -327,53 +327,57 @@ if __name__ == "__main__":
     # SEQUENCE
     query_limit = 100
     # CONTACT PREPARATION
-    update_stage_contact_with_org_source(
+    stage_contact_list = query_stage_contacts(
         session,
-        query_stage_contacts(
-            session,
-            query_limit,
-            process_status__c=["NOT STARTED"],
-            status__c=["NOT STARTED"],
-        ),
-        organization_source_dictionary(
-            query_organization_source(session, query_limit, is_active__c=[True])
-        ),
+        query_limit,
+        process_status__c=["NOT STARTED"],
+        status__c=["NOT STARTED"],
     )
-    validate_required_fields(
-        session,
-        query_stage_contacts(
+    if stage_contact_list.count() > 0:
+        update_stage_contact_with_org_source(
             session,
-            query_limit,
-            process_status__c=["ORG SOURCE"],
-            status__c=["IN PROGRESS"],
-        ),
-    )
-    validate_email_fields(
-        session,
-        query_stage_contacts(
+            stage_contact_list,
+            organization_source_dictionary(
+                query_organization_source(session, query_limit, is_active__c=[True])
+            ),
+        )
+        validate_required_fields(
             session,
-            query_limit,
-            process_status__c=["REQUIRED FIELDS"],
-            status__c=["IN PROGRESS"],
-        ),
-    )
-    validate_mobile_fields(
-        session,
-        query_stage_contacts(
+            query_stage_contacts(
+                session,
+                query_limit,
+                process_status__c=["ORG SOURCE"],
+                status__c=["IN PROGRESS"],
+            ),
+        )
+        validate_email_fields(
             session,
-            query_limit,
-            process_status__c=["EMAIL FIELDS"],
-            status__c=["IN PROGRESS"],
-        ),
-    )
-    # CONTACT PROCESSING
-    manage_create_records(
-        session,
-        query_stage_contacts(
+            query_stage_contacts(
+                session,
+                query_limit,
+                process_status__c=["REQUIRED FIELDS"],
+                status__c=["IN PROGRESS"],
+            ),
+        )
+        validate_mobile_fields(
             session,
-            query_limit,
-            process_status__c=["MOBILE FIELDS"],
-            status__c=["IN PROGRESS"],
-            is_matched_completed=[True],
-        ),
-    )
+            query_stage_contacts(
+                session,
+                query_limit,
+                process_status__c=["EMAIL FIELDS"],
+                status__c=["IN PROGRESS"],
+            ),
+        )
+        # CONTACT PROCESSING
+        manage_create_records(
+            session,
+            query_stage_contacts(
+                session,
+                query_limit,
+                process_status__c=["MOBILE FIELDS"],
+                status__c=["IN PROGRESS"],
+                is_matched_completed=[True],
+            ),
+        )
+    else:
+        print("No records to process at this time")
