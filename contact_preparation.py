@@ -29,6 +29,59 @@ def object_as_dict(obj):
     return {c.key: getattr(obj, c.key) for c in inspect(obj).mapper.column_attrs}
 
 
+def validate_stage_contacts(session, stage_contacts):
+    """-----------------------------------------------------------  
+    Description: Manage the validation functions
+    Argument: (1)list of stage contacts 
+    Return: 
+    -----------------------------------------------------------"""
+    req_validation_pass_list = validate_required_fields(stage_contacts)
+    email_validation_pass_list = []
+    mobile_validation_pass_list = []
+    if req_validation_pass_list:
+        email_validation_pass_list = validate_email_fields(req_validation_pass_list)
+    if email_validation_pass_list:
+        mobile_validation_pass_list = validate_mobile_fields(email_validation_pass_list)
+    if mobile_validation_pass_list:
+        dml_list_of_objects(
+            session,
+            update_stage_contact_status(
+                mobile_validation_pass_list, VALIDATION_COMPLETED, IN_PROGRESS
+            ),
+        )
+
+
+# REQUIRED FIELDS
+def validate_required_fields(stage_contacts):
+    """-----------------------------------------------------------  
+    Description:  validate required fields
+    Argument: (1)list of stage contacts 
+    Return: 
+    -----------------------------------------------------------"""
+    print("CHECK validate_stage_contacts")
+    rfv = dict()
+    req_validation_pass_list = []
+    req_validation_failed_list = []
+    for sc in stage_contacts:
+        rfv = required_field_validator(sc)
+        if rfv.get(HAS_ERROR):
+            sc.error_message__c = "REQUIRED FIELDS MISSING : {}".format(
+                ", ".join(rfv.get(ERROR_FIELDS))
+            )
+            req_validation_failed_list.append(sc)
+        else:
+            req_validation_pass_list.append(sc)
+
+    if req_validation_failed_list:
+        dml_list_of_objects(
+            session,
+            update_stage_contact_status(
+                req_validation_failed_list, REQUIRED_FIELDS, FAILED
+            ),
+        )
+    return req_validation_pass_list
+
+
 # REQUIRED FIELDS
 def required_field_validator(obj):
     """-----------------------------------------------------------
@@ -50,71 +103,63 @@ def required_field_validator(obj):
 
 
 # REQUIRED FIELDS
-def validate_email_fields(session, stage_contacts):
+def validate_email_fields(stage_contacts):
     """-----------------------------------------------------------  
     Description: if changed email is true old_email is required
     Argument: (1)session (2)list of stage contacts
     Return: 
     -----------------------------------------------------------"""
-    # print("CHECK validate_email_fields")
+    print("CHECK validate_email_fields")
+    email_validation_pass_list = []
+    email_validation_failed_list = []
     for sc in stage_contacts:
-        sc.process_status__c = "EMAIL FIELDS"
+        sc.process_status__c = "EMAIL VALIDATION"
         if sc.change_email__c == True and is_empty(sc.old_email__c):
             sc.status__c = FAILED
             sc.error_message__c = "REQUIRED FIELDS MISSING : old_email__c"
+            email_validation_failed_list.append(sc)
+        email_validation_pass_list.append(sc)
 
-        session.add(sc)
-    if session.dirty:
-        dml_submit_to_database(session)
+    if email_validation_failed_list:
+        dml_list_of_objects(
+            session,
+            update_stage_contact_status(
+                email_validation_failed_list, EMAIL_VALIDATION, FAILED
+            ),
+        )
+
+    return email_validation_pass_list
 
 
 # REQUIRED FIELDS
-def validate_mobile_fields(session, stage_contacts):
+def validate_mobile_fields(stage_contacts):
     """-----------------------------------------------------------  
     Description: if mobile phone is provided sms consent and date are required
     Argument: (1)session (2)list of stage contacts
     Return: 
     -----------------------------------------------------------"""
-    # print("CHECK validate_mobile_fields")
+    print("CHECK validate_mobile_fields")
+    mobile_validation_pass_list = []
+    mobile_validation_failed_list = []
     for sc in stage_contacts:
-        sc.process_status__c = "MOBILE FIELDS"
         if not is_empty(sc.mobile__c):
             if is_empty(sc.sms_consent_date__c):
-                sc.status__c = FAILED
                 sc.error_message__c = " sms_consent_date__c,"
             if is_empty(sc.sms_data_use_purpose__c):
-                sc.status__c = FAILED
                 sc.error_message__c += " sms_data_use_purpose__c,"
             if not is_empty(sc.error_message__c):
                 sc.error_message__c = "REQUIRED FIELDS MISSING : " + sc.error_message__c
-        session.add(sc)
-    if session.dirty:
-        dml_submit_to_database(session)
-
-
-# REQUIRED FIELDS
-def validate_required_fields(session, stage_contacts):
-    """-----------------------------------------------------------  
-    Description:  validate required fields
-    Argument: (1)session (2)list of stage contacts 
-    Return: 
-    -----------------------------------------------------------"""
-    # print("CHECK validate_stage_contacts")
-    rfv = dict()
-    for sc in stage_contacts:
-        rfv = required_field_validator(sc)
-        sc.process_status__c = REQUIRED_FIELDS
-        if rfv.get(HAS_ERROR):
-            sc.status__c = FAILED
-            sc.error_message__c = "REQUIRED FIELDS MISSING : {}".format(
-                ", ".join(rfv.get(ERROR_FIELDS))
-            )
-            session.add(sc)
+                mobile_validation_failed_list.append(sc)
         else:
-            sc.status__c = IN_PROGRESS
-            session.add(sc)
-    if session.dirty:
-        dml_submit_to_database(session)
+            mobile_validation_pass_list.append(sc)
+    if mobile_validation_failed_list:
+        dml_list_of_objects(
+            session,
+            update_stage_contact_status(
+                mobile_validation_failed_list, MOBILE_VALIDATION, FAILED
+            ),
+        )
+    return mobile_validation_pass_list
 
 
 # ORG SOURCE UPDATE
@@ -124,13 +169,32 @@ def update_stage_contact_with_org_source(session, stage_contacts, org_dict):
     Argument: (1)session (2)list of stage contacts (3)org source dictionary
     Return: 
     -----------------------------------------------------------"""
-    # print("CHECK update_stage_contact_with_org_source")
+    print("CHECK update_stage_contact_with_org_source")
     stage_contact_list = []
+    stage_contact_failed_list = []
     for sc in stage_contacts:
-        stage_contact_list.append(organization_source(sc, org_dict))
-    add_objects_to_session(session, stage_contact_list)
-    if session.dirty:
-        dml_submit_to_database(session)
+        if sc.client_id__c in org_dict.keys():
+            stage_contact_list.append(
+                organization_source(sc, org_dict.get(sc.client_id__c))
+            )
+        else:
+            sc.error_message__c = CLIENT_DOES_NOT_EXIST
+            stage_contact_failed_list.append(sc)
+
+    if stage_contact_list:
+        dml_list_of_objects(
+            session,
+            update_stage_contact_status(
+                stage_contact_list, CLIENT_TYPE_VALIDATION, IN_PROGRESS
+            ),
+        )
+    if stage_contact_failed_list:
+        dml_list_of_objects(
+            session,
+            update_stage_contact_status(
+                stage_contact_failed_list, CLIENT_TYPE_VALIDATION, FAILED
+            ),
+        )
 
 
 # ORG SOURCE UPDATE
@@ -192,3 +256,40 @@ def organization_source_dictionary(organization_sources):
     for org in organization_sources:
         org_dict[org.client_id__c] = org
     return org_dict
+
+
+# MAIN
+if __name__ == "__main__":
+    session = loadSession()
+    # DEBUG
+
+    # SEQUENCE
+    query_limit = 100
+    # CONTACT PREPARATION
+    stage_contact_list = query_stage_contacts(
+        session, query_limit, process_status__c=[NOT_STARTED], status__c=[NOT_STARTED],
+    )
+
+    if stage_contact_list.count() > 0:
+        update_stage_contact_with_org_source(
+            session,
+            stage_contact_list,
+            organization_source_dictionary(
+                query_organization_source(session, query_limit, is_active__c=[True])
+            ),
+        )
+    else:
+        print("No stage records to update with organization source")
+
+    stage_contact_validate = query_stage_contacts(
+        session,
+        query_limit,
+        process_status__c=[CLIENT_TYPE_VALIDATION],
+        status__c=[IN_PROGRESS],
+    )
+    if stage_contact_validate.count() > 0:
+        validate_stage_contacts(
+            session, stage_contact_validate,
+        )
+    else:
+        print("No stage records to validate")

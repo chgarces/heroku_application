@@ -1,4 +1,5 @@
 from uuid import uuid4
+from sqlalchemy import exc
 
 #
 # APP REQUIRED FIELDS
@@ -134,17 +135,70 @@ def add_objects_to_session(session, obj_list):
 
 
 # GENERIC
-def dml_submit_to_database(session):
+def dml_submit_set_to_database(session, record_set_dictionary, sc_dict):
     """-----------------------------------------------------------
-    Description: Manage DML operation in the database
+    Description: Manage DML operation in the database with the set of 
+                    records and update the stage contact status
     Argument: db session
     Return: 
     -----------------------------------------------------------"""
-    print("CHECK dml_records")
+    print("CHECK dml_submit_to_database")
+    # TODO update stage contact with error message in case of error
+    stage_contact_failed_list = []
+    stage_contact_passed_list = []
+    for scid in record_set_dictionary.keys():
+        for obj in record_set_dictionary.get(scid):
+            session.add(obj)
+        try:
+            session.commit()
+            stage_contact_passed_list.append(
+                sc_dict.get(scid), "POSTGRES COMPLETED", "IN PROGRESS"
+            )
+        # TODO: CATCH ERRORS
+        except exc.SQLAlchemyError as e:
+            print("THERE WAS AN ERROR WHILE CREATING SET OF RECORDS ")
+            session.rollback()
+            stage_contact_failed_list.append(
+                sc_dict.get(scid), "POSTGRES FAILED", "FAILED"
+            )
+
+    if stage_contact_failed_list:
+        dml_list_of_objects(session, stage_contact_failed_list)
+    if stage_contact_passed_list:
+        dml_list_of_objects(session, stage_contact_passed_list)
+
+
+# CREATE ALL RECORDS
+def update_stage_contact_status(stage_contacts, process_status, status):
+    """-----------------------------------------------------------
+    Description: Will update the stage contacs status after the related record are created
+    Argument:(1)list of stage contacts
+    Return: return stage contact obj
+    -----------------------------------------------------------"""
+    print("CHECK update_stage_contact_status ")
+    stage_contacts_list = []
+    for sc in stage_contacts:
+        sc.process_status__c = process_status
+        sc.status__c = status
+        stage_contacts_list.append(sc)
+
+    return stage_contacts_list
+
+
+# GENERIC
+def dml_list_of_objects(session, obj_list):
+    """-----------------------------------------------------------
+    Description: Commit a list of object to db
+    Argument:(1)list of stage contacts
+    Return: return a list of stage contacts
+    -----------------------------------------------------------"""
+    print("CHECK update_stage_contact_status ")
+
+    for obj in obj_list:
+        session.add(obj)
     try:
         session.commit()
-        # TODO: CATCH ERRORS
-    except expression as identifier:
+    except Exception as e:
         print("THERE WAS AN ERROR WHILE UPDATING STAGE CONTACTS")
     finally:
         session.close()
@@ -172,27 +226,13 @@ def create_dictionary_list(objects):
     Return: dictionary with the [key]=stage_contact_id_ext__c [value]=[obj]
     -----------------------------------------------------------"""
     # print("CHECK create_dictionary")
-    sc_dict = dict()
+    dict_list = dict()
     for obj in objects:
-        if obj.stage_contact_id_ext__c in sc_dict.keys():
-            sc_dict.get(obj.stage_contact_id_ext__c).append(obj)
+        if obj.stage_contact_id_ext__c in dict_list.keys():
+            dict_list.get(obj.stage_contact_id_ext__c).append(obj)
         else:
-            sc_dict[obj.stage_contact_id_ext__c] = [obj]
-    return sc_dict
-
-
-# GENERIC
-def update_stage_contacts(stage_contacts):
-    """-----------------------------------------------------------
-    Description: Will update the stage contacs status after the related record are created
-    Argument:(1)list of stage contacts
-    Return: return a list of stage contacts
-    -----------------------------------------------------------"""
-    stage_contact_list = []
-    for sc in stage_contacts:
-        sc.process_status__c = "POSTGRES COMPLETED"
-        stage_contact_list.append(sc)
-    return stage_contact_list
+            dict_list[obj.stage_contact_id_ext__c] = [obj]
+    return dict_list
 
 
 # CREATION CONTACT SOURCE IDENTIFIER
@@ -237,3 +277,19 @@ def contact_dictionary(cont_list):
     for c in cont_list:
         cont_dict[c.contact_id_ext__c] = c
     return cont_dict
+
+
+# GENERIC
+def build_record_sets_dictionary(obj_list, record_set_dictionary):
+    """-----------------------------------------------------------
+    Description: Group the object to be inserted into db by stage_contact_id_ext__c
+    Argument:(1)list of objects (2) dict() [key]= stage_contact_id_ext__c [value]= [obj]
+    Return: dict()
+    -----------------------------------------------------------"""
+    for obj in obj_list:
+        if obj.stage_contact_id_ext__c in record_set_dictionary.keys():
+            record_set_dictionary.get(obj.stage_contact_id_ext__c).append(obj)
+        else:
+            record_set_dictionary[obj.stage_contact_id_ext__c] = [obj]
+
+    return record_set_dictionary
