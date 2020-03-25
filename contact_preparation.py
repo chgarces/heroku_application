@@ -1,5 +1,7 @@
 from contact_model_engine import *
 from contact_utility import *
+from contact_variables import *
+from contact_mapper import *
 
 #
 # REQUIRED FIELDS
@@ -28,13 +30,13 @@ def object_as_dict(obj):
 
 
 # REQUIRED FIELDS
-def required_field_validator(session, obj):
+def required_field_validator(obj):
     """-----------------------------------------------------------
     Description: will validate required fields from a given object
     Argument: (1)session (2)object
     Return: dict with error and fields that error 
     -----------------------------------------------------------"""
-    print("CHECK required_field_validator")
+    # print("CHECK required_field_validator")
     required_errors = []
     rfv = dict()
     for rf in client_type_required_fields(obj):
@@ -43,6 +45,7 @@ def required_field_validator(session, obj):
     if len(required_errors) > 0:
         rfv[HAS_ERROR] = True
         rfv[ERROR_FIELDS] = required_errors
+
     return rfv
 
 
@@ -53,7 +56,7 @@ def validate_email_fields(session, stage_contacts):
     Argument: (1)session (2)list of stage contacts
     Return: 
     -----------------------------------------------------------"""
-    print("CHECK validate_email_fields")
+    # print("CHECK validate_email_fields")
     for sc in stage_contacts:
         sc.process_status__c = "EMAIL FIELDS"
         if sc.change_email__c == True and is_empty(sc.old_email__c):
@@ -62,7 +65,7 @@ def validate_email_fields(session, stage_contacts):
 
         session.add(sc)
     if session.dirty:
-        dml_stage_contact(session)
+        dml_submit_to_database(session)
 
 
 # REQUIRED FIELDS
@@ -72,7 +75,7 @@ def validate_mobile_fields(session, stage_contacts):
     Argument: (1)session (2)list of stage contacts
     Return: 
     -----------------------------------------------------------"""
-    print("CHECK validate_mobile_fields")
+    # print("CHECK validate_mobile_fields")
     for sc in stage_contacts:
         sc.process_status__c = "MOBILE FIELDS"
         if not is_empty(sc.mobile__c):
@@ -81,12 +84,12 @@ def validate_mobile_fields(session, stage_contacts):
                 sc.error_message__c = " sms_consent_date__c,"
             if is_empty(sc.sms_data_use_purpose__c):
                 sc.status__c = FAILED
-                sc.error_message__c += " sms_consent_date__c,"
+                sc.error_message__c += " sms_data_use_purpose__c,"
             if not is_empty(sc.error_message__c):
                 sc.error_message__c = "REQUIRED FIELDS MISSING : " + sc.error_message__c
         session.add(sc)
     if session.dirty:
-        dml_stage_contact(session)
+        dml_submit_to_database(session)
 
 
 # REQUIRED FIELDS
@@ -96,22 +99,22 @@ def validate_required_fields(session, stage_contacts):
     Argument: (1)session (2)list of stage contacts 
     Return: 
     -----------------------------------------------------------"""
-    print("CHECK validate_stage_contacts")
+    # print("CHECK validate_stage_contacts")
     rfv = dict()
     for sc in stage_contacts:
-        rfv = required_field_validator(session, sc)
+        rfv = required_field_validator(sc)
         sc.process_status__c = REQUIRED_FIELDS
         if rfv.get(HAS_ERROR):
             sc.status__c = FAILED
             sc.error_message__c = "REQUIRED FIELDS MISSING : {}".format(
-                ", ".join(rfv.get())
+                ", ".join(rfv.get(ERROR_FIELDS))
             )
             session.add(sc)
         else:
             sc.status__c = IN_PROGRESS
             session.add(sc)
     if session.dirty:
-        dml_stage_contact(session)
+        dml_submit_to_database(session)
 
 
 # ORG SOURCE UPDATE
@@ -121,44 +124,13 @@ def update_stage_contact_with_org_source(session, stage_contacts, org_dict):
     Argument: (1)session (2)list of stage contacts (3)org source dictionary
     Return: 
     -----------------------------------------------------------"""
-    print("CHECK update_stage_contact_with_org_source")
-
+    # print("CHECK update_stage_contact_with_org_source")
+    stage_contact_list = []
     for sc in stage_contacts:
-        if sc.client_id__c in org_dict.keys():
-            if is_empty(sc.stage_contact_id_ext__c):
-                sc.stage_contact_id_ext__c = get_unique_id()
-            sc.authorization_form_email_consent__c = org_dict.get(
-                sc.client_id__c
-            ).authorization_form_email_consent__c
-            sc.authorization_form_sms_consent__c = org_dict.get(
-                sc.client_id__c
-            ).authorization_form_sms_consent__c
-            sc.is_active__c = org_dict.get(sc.client_id__c).is_active__c
-            sc.is_app__c = org_dict.get(sc.client_id__c).is_app__c
-            sc.is_cat_consent__c = org_dict.get(sc.client_id__c).is_cat_consent__c
-            sc.is_dealer__c = org_dict.get(sc.client_id__c).is_dealer__c
-            sc.is_obfuscated__c = org_dict.get(sc.client_id__c).is_obfuscated__c
-            sc.is_salesforce_org__c = org_dict.get(sc.client_id__c).is_salesforce_org__c
-            sc.is_separate_contact__c = org_dict.get(
-                sc.client_id__c
-            ).is_separate_contact__c
-            sc.process_status__c = ORG SOURCE
-            sc.source_contact_record_type_id__c = org_dict.get(
-                sc.client_id__c
-            ).source_contact_record_type_id__c
-            sc.generic_record_type_id__c = org_dict.get(
-                sc.client_id__c
-            ).generic_record_type_id__c
-            sc.source_name__c = org_dict.get(sc.client_id__c).source_name__c
-            sc.status__c = IN_PROGRESS
-            session.add(sc)
-        else:
-            sc.process_status__c = ORG SOURCE
-            sc.status__c = FAILED
-            sc.error_message__c = CLIENT_DOES_NOT_EXIST
-            session.add(sc)
+        stage_contact_list.append(organization_source(sc, org_dict))
+    add_objects_to_session(session, stage_contact_list)
     if session.dirty:
-        dml_stage_contact(session)
+        dml_submit_to_database(session)
 
 
 # ORG SOURCE UPDATE
@@ -168,7 +140,7 @@ def query_stage_contacts(session, query_limit, **kwargs):
     Argument: (1)session (2)integer for query limit (3)query filters
     Return: list of org source objects 
     -----------------------------------------------------------"""
-    print("CHECK query_stage_contacts")
+    # print("CHECK query_stage_contacts")
     try:
         q = session.query(StageContact)
         for key, value in kwargs.items():
@@ -180,7 +152,7 @@ def query_stage_contacts(session, query_limit, **kwargs):
         print("THERE WAS AN ERROR WHILE QUERYING STAGE CONTACTS")
 
     # for sc in stage_contacts:
-    #     print("CHECK SC {}".format(sc.process_status__c))
+    #     # print("CHECK SC {}".format(sc.process_status__c))
     return stage_contacts
 
 
@@ -191,7 +163,7 @@ def query_organization_source(session, query_limit, **kwargs):
     Argument: (1)session (2)integer for query limit (3)query filters
     Return: list of org source objects 
     -----------------------------------------------------------"""
-    print("CHECK query_organization_source")
+    # print("CHECK query_organization_source")
     try:
         q = session.query(OrganizationSource)
         for key, value in kwargs.items():
@@ -203,7 +175,7 @@ def query_organization_source(session, query_limit, **kwargs):
         print("THERE WAS AN ERROR WHILE QUERYING ORG SOURCES")
 
     # for org in organization_sources:
-    #     print("CHECK ORG {}".format(org.client_id__c))
+    #     # print("CHECK ORG {}".format(org.client_id__c))
     return organization_sources
 
 
@@ -214,7 +186,7 @@ def organization_source_dictionary(organization_sources):
     Argument:(1)list of organization source
     Return: dictionary with the [key]=client_id [value]=obj
     -----------------------------------------------------------"""
-    print("CHECK organization_source")
+    # print("CHECK organization_source")
     org_dict = dict()
 
     for org in organization_sources:

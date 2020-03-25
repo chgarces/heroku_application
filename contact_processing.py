@@ -8,7 +8,7 @@ def create_individual(sc_dict):
     Argument: (1)stage contacts dictionary
     Return: list of individual 
     -----------------------------------------------------------"""
-    print("CHECK create_individual")
+    # print("CHECK create_individual")
     ind_list = []
     for k in sc_dict.keys():
         if sc_dict.get(k).is_obfuscated__c:
@@ -26,7 +26,7 @@ def create_contact(sc_dict, ind_dict):
     Argument:  (1)stage contacts dictionary (2) individual dictionary
     Return: list of contact objects 
     -----------------------------------------------------------"""
-    print("CHECK create_contact")
+    # print("CHECK create_contact")
     cont_list = []
     for k in ind_dict.keys():
         if sc_dict.get(k).is_obfuscated__c:
@@ -51,7 +51,7 @@ def create_contact_source(sc_dict, cont_dict):
     Argument:  (1)stage contacts dictionary (2) contact dictionary
     Return: list of contact source objects 
     -----------------------------------------------------------"""
-    print("CHECK create_contact_source")
+    # print("CHECK create_contact_source")
     cont_source_list = []
     for k in cont_dict.keys():
         for c in cont_dict.get(k):
@@ -66,7 +66,7 @@ def create_contact_identifier(sc_dict, cont_dict):
     Argument:  (1)stage contacts dictionary (2) contact dictionary
     Return: list of contact source objects 
     -----------------------------------------------------------"""
-    print("CHECK create_contact_identifier")
+    # print("CHECK create_contact_identifier")
     cont_ident_list = []
     for k in cont_dict.keys():
         for c in cont_dict.get(k):
@@ -110,96 +110,138 @@ def create_contact_source_identifier(contact_source_dict, contact_identifier_dic
 
 
 # CREATION CONTACT POINTS
-def create_contact_points(cont_identifier_list):
+def filter_contact_identifier(cont_identifier_list, indentifier_group):
     """-----------------------------------------------------------
-    Description: Build the contact point objects
-    Argument: (1)list of contact identifiers (2)
+    Description: filter contact points by type Email, Phone, and Mobile
+    Argument: (1)list of contact identifiers (2) indentifier_group
     Return: list of contact points
     -----------------------------------------------------------"""
-    print("CHECK create_contact_points")
     cont_point_list = []
-    cont_point_email_list = []
-    cont_point_phone_list = []
-    cont_point_mobile_list = []
     for ci in cont_identifier_list:
-        if ci.identifier_group__c == "Email":
-            cont_point_email_list.append(ci)
-        if ci.identifier_group__c == "Mobile":
-            cont_point_mobile_list.append(ci)
-        if ci.identifier_group__c == "Phone":
-            cont_point_phone_list.append(ci)
-
-    if len(cont_point_email_list) > 0:
-        cont_point_list += create_contact_point_email(cont_point_email_list)
-    if len(cont_point_mobile_list) > 0:
-        cont_point_list += create_contact_point_mobile(cont_point_mobile_list)
-    if len(cont_point_phone_list) > 0:
-        cont_point_list += create_contact_point_phone(cont_point_phone_list)
+        if ci.identifier_group__c == indentifier_group:
+            cont_point_list.append(ci)
 
     return cont_point_list
 
 
-# CREATION CONTACT POINT
-def create_contact_point_email(cont_identifier_list):
+# CREATION CONTACT POINT EMAIL
+def create_contact_point_email(cont_identifier_list, sc_dict, cont_dict):
     """-----------------------------------------------------------
     Description: Build the contact point email objects
     Argument: (1)list of email contact identifiers 
     Return: list of contact point email
     -----------------------------------------------------------"""
-    print("CHECK create_contact_point_email")
+    # print("create_contact_point_email")
+
     cont_point_email_list = []
     for ci in cont_identifier_list:
-        cont_point_email_list.append(contact_point_email(ci))
+        cont_point_email_list.append(
+            contact_point_email(
+                ci,
+                sc_dict.get(ci.stage_contact_id_ext__c),
+                cont_dict.get(ci.contact_id_ext__c),
+            )
+        )
     return cont_point_email_list
 
 
 # CREATION CONTACT POINT PHONE
-def create_contact_point_phone(cont_identifier_list):
+def create_contact_point_phone(cont_identifier_list, sc_dict, cont_dict):
     """-----------------------------------------------------------
     Description: Build the contact point phone objects
     Argument: (1)list of phone contact identifiers (2)
     Return: list of contact point phone
     -----------------------------------------------------------"""
-    print("CHECK create_contact_point_phone")
+    # print("CHECK create_contact_point_phone")
 
     cont_point_phone_list = []
     for ci in cont_identifier_list:
-        cont_point_phone_list.append(contact_point_phone(ci))
+        cont_point_phone_list.append(
+            contact_point_phone(
+                ci,
+                sc_dict.get(ci.stage_contact_id_ext__c),
+                cont_dict.get(ci.contact_id_ext__c),
+            )
+        )
     return cont_point_phone_list
 
 
 # CREATION CONTACT POINT MOBILE
-def create_contact_point_mobile(cont_identifier_list):
+def create_contact_point_mobile(cont_identifier_list, sc_dict, cont_dict):
     """-----------------------------------------------------------
     Description: Build the contact point mobile objects
     Argument: (1)list or mobile contact identifiers (2)
     Return: list of contact point mobile
     -----------------------------------------------------------"""
-    print("CHECK create_contact_point_mobile")
+    # print("CHECK create_contact_point_mobile")
 
     cont_point_mobile_list = []
     for ci in cont_identifier_list:
-        cont_point_mobile_list.append(contact_point_mobile(ci))
+        cont_point_mobile_list.append(
+            contact_point_mobile(
+                ci,
+                sc_dict.get(ci.stage_contact_id_ext__c),
+                cont_dict.get(ci.contact_id_ext__c),
+            )
+        )
     return cont_point_mobile_list
 
 
-# CREATION CONTACT POINT CONSENT
-def create_contact_point_consent(cont_point_list, sc_dict, ind_dict):
+# CREATION CONTACT POINT CONSENT EMAIL
+def create_contact_consent_email(cont_point_list, sc_dict, cont_id_dict):
     """-----------------------------------------------------------
-    Description: Create contact point consent 
-    Argument:(1)list of contact point (email/phone/mobile) (2)Stage contact dictionary (3)Individual dictionary
-    Return: list of contact point consent 
+    Description: mange the creation of contact consent for email
+    Argument:(1)session (2)list of stage contacts
+    Return: 
     -----------------------------------------------------------"""
-    print("CHECK create_contact_point_consent")
-    cont_consent_list = []
-
+    email_consent_list = []
     for cp in cont_point_list:
-        cont_consent_list.append(
-            contact_point_consent(
-                cp, ind_dict.get(cp.stage_contact_id_ext__c).individual_id_ext__c
+        email_consent_list.append(
+            email_contact_point_consent(
+                cp,
+                sc_dict.get(cp.stage_contact_id_ext__c),
+                cont_id_dict.get(cp.contact_id_ext__c),
             )
         )
-    return cont_consent_list
+    return email_consent_list
+
+
+# CREATION CONTACT POINT CONSENT MOBILE
+def create_contact_consent_mobile(cont_point_list, sc_dict, cont_id_dict):
+    """-----------------------------------------------------------
+    Description: mange the creation of contact consent for mobile
+    Argument:(1)session (2)list of stage contacts
+    Return: 
+    -----------------------------------------------------------"""
+    mobile_consent_list = []
+    for cp in cont_point_list:
+        mobile_consent_list.append(
+            mobile_contact_point_consent(
+                cp,
+                sc_dict.get(cp.stage_contact_id_ext__c),
+                cont_id_dict.get(cp.contact_id_ext__c),
+            )
+        )
+    return mobile_consent_list
+
+
+# CREATION CONTACT POINT CONSENT PHONE
+def create_contact_consent_phone(cont_point_list, sc_dict, cont_id_dict):
+    """-----------------------------------------------------------
+    Description: mange the creation of contact consent for phone
+    Argument:(1)session (2)list of stage contacts
+    Return: 
+    -----------------------------------------------------------"""
+    phone_consent_list = []
+    for cp in cont_point_list:
+        phone_consent_list.append(
+            phone_contact_point_consent(
+                cp,
+                sc_dict.get(cp.stage_contact_id_ext__c),
+                cont_id_dict.get(cp.contact_id_ext__c),
+            )
+        )
+    return phone_consent_list
 
 
 # GENERIC
@@ -209,7 +251,7 @@ def manage_create_records(session, stage_contacts):
     Argument:(1)session (2)list of stage contacts
     Return: 
     -----------------------------------------------------------"""
-    print("CHECK manage_create_records")
+    # print("CHECK manage_create_records")
     sc_dict = create_dictionary(stage_contacts)
     # Individual
     ind_list = create_individual(sc_dict)
@@ -232,20 +274,49 @@ def manage_create_records(session, stage_contacts):
         contact_source_dict, contact_identifier_dict
     )
     add_objects_to_session(session, cont_sou_ident_list)
-    # ContactPoint
-    cont_point_list = create_contact_points(cont_identifier_list)
-    add_objects_to_session(session, cont_point_list)
-    # ContactPointConsent
-    cont_consent_list = create_contact_point_consent(cont_point_list, sc_dict, ind_dict)
-    add_objects_to_session(session, cont_consent_list)
+    # ContactPoint EMAIL
+    cont_id_dict = contact_dictionary(cont_list)
+    email_cont_ident_list = filter_contact_identifier(cont_identifier_list, EMAIL)
+    cont_point_email_list = create_contact_point_email(
+        email_cont_ident_list, sc_dict, cont_id_dict
+    )
+    add_objects_to_session(session, cont_point_email_list)
+    # ContactPoint MOBILE
+    mobile_cont_ident_list = filter_contact_identifier(cont_identifier_list, MOBILE)
+    cont_point_mobile_list = create_contact_point_mobile(
+        mobile_cont_ident_list, sc_dict, cont_id_dict
+    )
+    add_objects_to_session(session, cont_point_mobile_list)
+    # ContactPoints PHONE
+    phone_cont_ident_list = filter_contact_identifier(cont_identifier_list, PHONE)
+    cont_point_phone_list = create_contact_point_phone(
+        phone_cont_ident_list, sc_dict, cont_id_dict
+    )
+    add_objects_to_session(session, cont_point_phone_list)
+    # MOBILE CONSENT
+    mobile_consent_list = create_contact_consent_mobile(
+        cont_point_mobile_list, sc_dict, cont_id_dict
+    )
+    add_objects_to_session(session, mobile_consent_list)
+    # PHONE CONSENT
+    phone_consent_list = create_contact_consent_phone(
+        cont_point_phone_list, sc_dict, cont_id_dict
+    )
+    add_objects_to_session(session, phone_consent_list)
+    # EMAIL CONSENT
+    email_consent_list = create_contact_consent_email(
+        cont_point_email_list, sc_dict, cont_id_dict
+    )
+    add_objects_to_session(session, email_consent_list)
 
     if session.new:
-        dml_stage_contact(session)
+        dml_submit_to_database(session)
         # update StageContacts status
         add_objects_to_session(session, update_stage_contacts(stage_contacts))
-        dml_stage_contact(session)
+        dml_submit_to_database(session)
 
 
+# TODO VALIDATE THE RECORD MAPPING AND CREATION
 # MAIN
 if __name__ == "__main__":
     session = loadSession()
@@ -254,53 +325,61 @@ if __name__ == "__main__":
     # SEQUENCE
     query_limit = 100
     # CONTACT PREPARATION
-    update_stage_contact_with_org_source(
+    stage_contact_list = query_stage_contacts(
         session,
-        query_stage_contacts(
-            session,
-            query_limit,
-            process_status__c=["NOT STARTED"],
-            status__c=["NOT STARTED"],
-        ),
-        organization_source_dictionary(
-            query_organization_source(session, query_limit, is_active__c=[True])
-        ),
+        query_limit,
+        process_status__c=["NOT STARTED"],
+        status__c=["NOT STARTED"],
     )
-    validate_required_fields(
-        session,
-        query_stage_contacts(
+    if stage_contact_list.count() > 0:
+        update_stage_contact_with_org_source(
             session,
-            query_limit,
-            process_status__c=["ORG SOURCE"],
-            status__c=["IN PROGRESS"],
-        ),
-    )
-    validate_email_fields(
-        session,
-        query_stage_contacts(
+            stage_contact_list,
+            organization_source_dictionary(
+                query_organization_source(session, query_limit, is_active__c=[True])
+            ),
+        )
+        validate_required_fields(
             session,
-            query_limit,
-            process_status__c=["REQUIRED FIELDS"],
-            status__c=["IN PROGRESS"],
-        ),
-    )
-    validate_mobile_fields(
-        session,
-        query_stage_contacts(
+            query_stage_contacts(
+                session,
+                query_limit,
+                process_status__c=["ORG SOURCE"],
+                status__c=["IN PROGRESS"],
+            ),
+        )
+        validate_email_fields(
             session,
-            query_limit,
-            process_status__c=["EMAIL FIELDS"],
-            status__c=["IN PROGRESS"],
-        ),
-    )
+            query_stage_contacts(
+                session,
+                query_limit,
+                process_status__c=["REQUIRED FIELDS"],
+                status__c=["IN PROGRESS"],
+            ),
+        )
+        validate_mobile_fields(
+            session,
+            query_stage_contacts(
+                session,
+                query_limit,
+                process_status__c=["EMAIL FIELDS"],
+                status__c=["IN PROGRESS"],
+            ),
+        )
+    else:
+        print("No records to prepare at this time")
+
     # CONTACT PROCESSING
-    manage_create_records(
+    ready_stage_contact_list = query_stage_contacts(
         session,
-        query_stage_contacts(
-            session,
-            query_limit,
-            process_status__c=["MOBILE FIELDS"],
-            status__c=["IN PROGRESS"],
-            is_matched_completed=[True],
-        ),
+        query_limit,
+        process_status__c=["MOBILE FIELDS"],
+        status__c=["IN PROGRESS"],
+        is_matched_completed=[True],
     )
+    if ready_stage_contact_list.count() > 0:
+        manage_create_records(
+            session, ready_stage_contact_list,
+        )
+    else:
+        print("No stage records to process")

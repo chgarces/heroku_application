@@ -1,7 +1,8 @@
-from contact_variables import *
 
-str = "email@google.com"
 
-# print(str.find("@"))
 
-print(FIRSTNAME)
+from datetime import date
+
+x = date.today()
+
+print(x.strftime("%m %d %Y"))
