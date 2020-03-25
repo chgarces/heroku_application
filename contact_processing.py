@@ -109,22 +109,22 @@ def create_contact_source_identifier(contact_source_dict, contact_identifier_dic
     return cont_sou_ident_list
 
 
-# CREATION CONTACT POINT
-def filter_contact_point(cont_identifier_list, filter):
+# CREATION CONTACT POINTS
+def filter_contact_identifier(cont_identifier_list, indentifier_group):
     """-----------------------------------------------------------
     Description: filter contact points by type Email, Phone, and Mobile
-    Argument: (1)list of contact identifiers (2) Filter
+    Argument: (1)list of contact identifiers (2) indentifier_group
     Return: list of contact points
     -----------------------------------------------------------"""
     cont_point_list = []
     for ci in cont_identifier_list:
-        if ci.identifier_group__c == filter:
+        if ci.identifier_group__c == indentifier_group:
             cont_point_list.append(ci)
 
     return cont_point_list
 
 
-# CREATION CONTACT POINT
+# CREATION CONTACT POINT EMAIL
 def create_contact_point_email(cont_identifier_list, sc_dict, cont_dict):
     """-----------------------------------------------------------
     Description: Build the contact point email objects
@@ -157,7 +157,7 @@ def create_contact_point_phone(cont_identifier_list, sc_dict, cont_dict):
     cont_point_phone_list = []
     for ci in cont_identifier_list:
         cont_point_phone_list.append(
-            contact_point_email(
+            contact_point_phone(
                 ci,
                 sc_dict.get(ci.stage_contact_id_ext__c),
                 cont_dict.get(ci.contact_id_ext__c),
@@ -178,7 +178,7 @@ def create_contact_point_mobile(cont_identifier_list, sc_dict, cont_dict):
     cont_point_mobile_list = []
     for ci in cont_identifier_list:
         cont_point_mobile_list.append(
-            contact_point_email(
+            contact_point_mobile(
                 ci,
                 sc_dict.get(ci.stage_contact_id_ext__c),
                 cont_dict.get(ci.contact_id_ext__c),
@@ -187,6 +187,7 @@ def create_contact_point_mobile(cont_identifier_list, sc_dict, cont_dict):
     return cont_point_mobile_list
 
 
+# CREATION CONTACT POINT CONSENT EMAIL
 def create_contact_consent_email(cont_point_list, sc_dict, cont_id_dict):
     """-----------------------------------------------------------
     Description: mange the creation of contact consent for email
@@ -205,6 +206,7 @@ def create_contact_consent_email(cont_point_list, sc_dict, cont_id_dict):
     return email_consent_list
 
 
+# CREATION CONTACT POINT CONSENT MOBILE
 def create_contact_consent_mobile(cont_point_list, sc_dict, cont_id_dict):
     """-----------------------------------------------------------
     Description: mange the creation of contact consent for mobile
@@ -223,6 +225,7 @@ def create_contact_consent_mobile(cont_point_list, sc_dict, cont_id_dict):
     return mobile_consent_list
 
 
+# CREATION CONTACT POINT CONSENT PHONE
 def create_contact_consent_phone(cont_point_list, sc_dict, cont_id_dict):
     """-----------------------------------------------------------
     Description: mange the creation of contact consent for phone
@@ -273,21 +276,21 @@ def manage_create_records(session, stage_contacts):
     add_objects_to_session(session, cont_sou_ident_list)
     # ContactPoint EMAIL
     cont_id_dict = contact_dictionary(cont_list)
-    cont_ident_email_list = filter_contact_point(cont_identifier_list, EMAIL)
+    email_cont_ident_list = filter_contact_identifier(cont_identifier_list, EMAIL)
     cont_point_email_list = create_contact_point_email(
-        cont_ident_email_list, sc_dict, cont_id_dict
+        email_cont_ident_list, sc_dict, cont_id_dict
     )
     add_objects_to_session(session, cont_point_email_list)
     # ContactPoint MOBILE
-    cont_ident_mobile_list = filter_contact_point(cont_identifier_list, MOBILE)
+    mobile_cont_ident_list = filter_contact_identifier(cont_identifier_list, MOBILE)
     cont_point_mobile_list = create_contact_point_mobile(
-        cont_ident_mobile_list, sc_dict, cont_id_dict
+        mobile_cont_ident_list, sc_dict, cont_id_dict
     )
     add_objects_to_session(session, cont_point_mobile_list)
     # ContactPoints PHONE
-    cont_ident_phone_list = filter_contact_point(cont_identifier_list, PHONE)
+    phone_cont_ident_list = filter_contact_identifier(cont_identifier_list, PHONE)
     cont_point_phone_list = create_contact_point_phone(
-        cont_ident_phone_list, sc_dict, cont_id_dict
+        phone_cont_ident_list, sc_dict, cont_id_dict
     )
     add_objects_to_session(session, cont_point_phone_list)
     # MOBILE CONSENT
@@ -295,16 +298,16 @@ def manage_create_records(session, stage_contacts):
         cont_point_mobile_list, sc_dict, cont_id_dict
     )
     add_objects_to_session(session, mobile_consent_list)
-    # EMAIL CONSENT
-    email_consent_list = create_contact_consent_email(
-        cont_point_email_list, sc_dict, cont_id_dict
-    )
-    add_objects_to_session(session, email_consent_list)
     # PHONE CONSENT
     phone_consent_list = create_contact_consent_phone(
         cont_point_phone_list, sc_dict, cont_id_dict
     )
     add_objects_to_session(session, phone_consent_list)
+    # EMAIL CONSENT
+    email_consent_list = create_contact_consent_email(
+        cont_point_email_list, sc_dict, cont_id_dict
+    )
+    add_objects_to_session(session, email_consent_list)
 
     if session.new:
         dml_submit_to_database(session)
@@ -363,16 +366,20 @@ if __name__ == "__main__":
                 status__c=["IN PROGRESS"],
             ),
         )
-        # CONTACT PROCESSING
+    else:
+        print("No records to prepare at this time")
+
+    # CONTACT PROCESSING
+    ready_stage_contact_list = query_stage_contacts(
+        session,
+        query_limit,
+        process_status__c=["MOBILE FIELDS"],
+        status__c=["IN PROGRESS"],
+        is_matched_completed=[True],
+    )
+    if ready_stage_contact_list.count() > 0:
         manage_create_records(
-            session,
-            query_stage_contacts(
-                session,
-                query_limit,
-                process_status__c=["MOBILE FIELDS"],
-                status__c=["IN PROGRESS"],
-                is_matched_completed=[True],
-            ),
+            session, ready_stage_contact_list,
         )
     else:
-        print("No records to process at this time")
+        print("No stage records to process")

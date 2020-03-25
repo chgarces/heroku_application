@@ -65,7 +65,7 @@ def validate_email_fields(session, stage_contacts):
 
         session.add(sc)
     if session.dirty:
-        dml_stage_contact(session)
+        dml_submit_to_database(session)
 
 
 # REQUIRED FIELDS
@@ -89,7 +89,7 @@ def validate_mobile_fields(session, stage_contacts):
                 sc.error_message__c = "REQUIRED FIELDS MISSING : " + sc.error_message__c
         session.add(sc)
     if session.dirty:
-        dml_stage_contact(session)
+        dml_submit_to_database(session)
 
 
 # REQUIRED FIELDS
@@ -114,7 +114,7 @@ def validate_required_fields(session, stage_contacts):
             sc.status__c = IN_PROGRESS
             session.add(sc)
     if session.dirty:
-        dml_stage_contact(session)
+        dml_submit_to_database(session)
 
 
 # ORG SOURCE UPDATE
@@ -130,7 +130,7 @@ def update_stage_contact_with_org_source(session, stage_contacts, org_dict):
         stage_contact_list.append(organization_source(sc, org_dict))
     add_objects_to_session(session, stage_contact_list)
     if session.dirty:
-        dml_stage_contact(session)
+        dml_submit_to_database(session)
 
 
 # ORG SOURCE UPDATE

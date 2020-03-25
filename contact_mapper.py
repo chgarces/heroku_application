@@ -310,7 +310,7 @@ def mobile_identifier(stage_contact, contact):
     ci.matm_owner__c = contact.matm_owner__c
     ci.status__c = ACTIVE
     ci.status_reason__c = NEW_CONTACT_CREATED
-    ci.status_source__c = stage_contact.contact_source__c
+    ci.status_source__c = stage_contact.source_name__c
     ci.status_time__c = stage_contact.email_consent_date__c
 
     # ID's
@@ -338,7 +338,7 @@ def phone_identifier(stage_contact, contact):
     ci.matm_owner__c = contact.matm_owner__c
     ci.status__c = ACTIVE
     ci.status_reason__c = NEW_CONTACT_CREATED
-    ci.status_source__c = stage_contact.contact_source__c
+    ci.status_source__c = stage_contact.source_name__c
     ci.status_time__c = stage_contact.email_consent_date__c
 
     # ID's
@@ -386,9 +386,13 @@ def source_id_identifier(stage_contact, contact):
     ci = ContactIdentifier()
 
     ci.identifier_type__c = SALESFORCE_ID
-    ci.identifier_group__c = stage_contact.source_name__c + MASTER_CONTACT_ID
+    ci.identifier_group__c = stage_contact.source_name__c + " " + MASTER_CONTACT_ID
     ci.Identifier__c = stage_contact.source_id__c
     ci.matm_owner__c = contact.matm_owner__c
+    ci.last_known_activity__c = datetime.utcnow()
+    ci.status__c = ACTIVE
+    ci.status_reason__c = NEW_CONTACT_CREATED
+    ci.status_source__c = stage_contact.source_name__c
 
     # ID's
     ci.contact_identifier_id_ext__c = get_unique_id()
@@ -415,6 +419,8 @@ def dealer_code_identifier(stage_contact, contact):
     ci.status_reason__c = NEW_CONTACT_CREATED
     ci.matm_owner__c = contact.matm_owner__c
     ci.last_known_activity__c = datetime.utcnow()
+    ci.status__c = ACTIVE
+    ci.status_source__c = stage_contact.source_name__c
 
     # ID's
     ci.contact_identifier_id_ext__c = get_unique_id()
@@ -440,6 +446,10 @@ def dealer_customer_number_identifier(stage_contact, contact):
         stage_contact.dealer_code__c + stage_contact.dealer_customer_number__c
     )
     ci.matm_owner__c = contact.matm_owner__c
+    ci.last_known_activity__c = datetime.utcnow()
+    ci.status__c = ACTIVE
+    ci.status_reason__c = NEW_CONTACT_CREATED
+    ci.status_source__c = stage_contact.source_name__c
 
     # ID's
     ci.contact_identifier_id_ext__c = get_unique_id()
@@ -460,6 +470,7 @@ def contact_source_identifier(cont_ident, cont_sour):
 
     # ID's
     csi.contact_source_identifier_id_ext__c = get_unique_id()
+    csi.contact_id_ext__c = cont_ident.contact_id_ext__c
     csi.contact_identifier_id_ext__c = cont_ident.contact_identifier_id_ext__c
     csi.contact_source_id_ext__c = cont_sour.contact_source_id_ext__c
     csi.stage_contact_id_ext__c = cont_ident.stage_contact_id_ext__c
@@ -512,7 +523,7 @@ def contact_point_mobile(cont_ident, stage_contact, contact):
     cpm.activefromdate = stage_contact.sms_consent_date__c
     cpm.matm_owner__c = contact.matm_owner__c
     cpm.issmscapable = True
-    cpm.isbusiness = False
+    cpm.isbusinessphone = False
     # TODO
     # cpm.areacode =
     # cpm.formattednationalphonenumber =
@@ -540,13 +551,13 @@ def contact_point_phone(cont_ident, stage_contact, contact):
     cpp.activefromdate = stage_contact.sms_consent_date__c
     cpp.matm_owner__c = contact.matm_owner__c
     cpp.issmscapable = False
-    cpp.isbusiness = True
+    cpp.isbusinessphone = True
 
     # ID'S
     cpp.contact_point_phone_id_ext__c = get_unique_id()
     cpp.contact_identifier_id_ext__c = cont_ident.contact_identifier_id_ext__c
-    cpe.contact_id_ext__c = contact.contact_id_ext__c
-    cpe.individual_id_ext__c = contact.individual_id_ext__c
+    cpp.contact_id_ext__c = contact.contact_id_ext__c
+    cpp.individual_id_ext__c = contact.individual_id_ext__c
     cpp.stage_contact_id_ext__c = cont_ident.stage_contact_id_ext__c
 
     return cpp
@@ -565,12 +576,12 @@ def email_contact_point_consent(cont_point, stage_contact, contact):
     epc.capturedate = stage_contact.email_consent_date__c
     epc.matm_owner__c = cont_point.matm_owner__c
     epc.capturesource = (
-        "{}".format(stage_contact.source_name__c)
+        "{} ".format(stage_contact.source_name__c)
         + " | "
         + "{}".format(stage_contact.campaign_most_recent__c)
         + " | "
         + "{}".format(stage_contact.form_name__c)
-    )[0, 255]
+    )[0:255]
     epc.capturecontactpointtype = EMAIL
     epc.name = (
         EMAIL_CONSENT
@@ -578,16 +589,17 @@ def email_contact_point_consent(cont_point, stage_contact, contact):
         + " | "
         + "{}".format(stage_contact.email__c)
         + " | "
-        + date
-    )[0, 255]
+        + "{}".format(date.today().strftime("%m/ %d /%Y"))
+    )[0:255]
 
     # ID'S
     epc.data_use_purpose_id_ext__c = stage_contact.email_data_use_purpose__c
     epc.contact_point_consent_id_ext__c = get_unique_id()
     epc.stage_contact_id_ext__c = cont_point.stage_contact_id_ext__c
     epc.contact_id_ext__c = contact.contact_id_ext__c
-    epc.contact_point_id_ext__c = cont_point.contact_point_email_id_ext__c
-    epc.authorization_form_id_ext__c = stage_contact.authorization_form_id_ext__c
+    epc.individual_id_ext__c = contact.individual_id_ext__c
+    epc.authorization_form_id_ext__c = stage_contact.authorization_form_email_consent__c
+    epc.capture_contact_point_id_ext__c = cont_point.contact_point_email_id_ext__c
 
     return epc
 
@@ -604,30 +616,31 @@ def mobile_contact_point_consent(cont_point, stage_contact, contact):
     mpc.effectivefrom = stage_contact.sms_consent_date__c
     mpc.capturedate = stage_contact.sms_consent_date__c
     mpc.matm_owner__c = cont_point.matm_owner__c
-    epc.capturesource = (
-        "{}".format(stage_contact.source_name__c)
+    mpc.capturesource = (
+        "{} ".format(stage_contact.source_name__c)
         + " | "
         + "{}".format(stage_contact.campaign_most_recent__c)
         + " | "
         + "{}".format(stage_contact.form_name__c)
-    )[0, 255]
-    epc.capturecontactpointtype = MOBILE
-    epc.name = (
+    )[0:255]
+    mpc.capturecontactpointtype = MOBILE
+    mpc.name = (
         SMS_CONSENT
-        + "{}".format(stage_contact.source_name__c)
+        + "{} ".format(stage_contact.source_name__c)
         + " | "
         + "{}".format(stage_contact.mobile__c)
         + " | "
-        + date
-    )[0, 255]
+        + "{}".format(date.today().strftime("%m/ %d /%Y"))
+    )[0:255]
 
     # ID'S
-    mpc.data_use_purpose_id_ext__c = stage_contact.sms_data_use_purpose__c
     mpc.contact_point_consent_id_ext__c = get_unique_id()
+    mpc.data_use_purpose_id_ext__c = stage_contact.sms_data_use_purpose__c
     mpc.stage_contact_id_ext__c = cont_point.stage_contact_id_ext__c
     mpc.contact_id_ext__c = contact.contact_id_ext__c
-    mpc.contact_point_id_ext__c = cont_point.contact_point_phone_id_ext__c
-    mpc.authorization_form_id_ext__c = stage_contact.authorization_form_id_ext__c
+    mpc.individual_id_ext__c = contact.individual_id_ext__c
+    mpc.authorization_form_id_ext__c = stage_contact.authorization_form_sms_consent__c
+    mpc.capture_contact_point_id_ext__c = cont_point.contact_point_phone_id_ext__c
 
     return mpc
 
@@ -641,30 +654,34 @@ def phone_contact_point_consent(cont_point, stage_contact, contact):
     -----------------------------------------------------------"""
     ppc = ContactPointConsent()
 
-    mpc.effectivefrom = stage_contact.sms_consent_date__c
-    mpc.capturedate = stage_contact.sms_consent_date__c
-    mpc.matm_owner__c = cont_point.matm_owner__c
-    mpc.privacyconsentstatus = NOT_SEEN
-    epc.capturesource = (
+    ppc.effectivefrom = datetime.utcnow()
+    ppc.capturedate = datetime.utcnow()
+    ppc.matm_owner__c = cont_point.matm_owner__c
+    ppc.privacyconsentstatus = NOT_SEEN
+    ppc.capturesource = (
         "{}".format(stage_contact.source_name__c)
         + " | "
         + "{}".format(stage_contact.campaign_most_recent__c)
         + " | "
         + "{}".format(stage_contact.form_name__c)
-    )[0, 255]
-    epc.capturecontactpointtype = PHONE
-    epc.name = (
+    )[0:255]
+    ppc.capturecontactpointtype = PHONE
+    ppc.name = (
         "{}".format(stage_contact.source_name__c)
         + " | "
         + "{}".format(stage_contact.phone__c)
         + " | "
-        + date
-    )[0, 255]
+        + "{}".format(date.today().strftime("%m/ %d /%Y"))
+    )[0:255]
 
     # ID'S
     ppc.contact_point_consent_id_ext__c = get_unique_id()
     ppc.stage_contact_id_ext__c = cont_point.stage_contact_id_ext__c
     ppc.contact_id_ext__c = contact.contact_id_ext__c
-    ppc.contact_point_id_ext__c = cont_point.contact_point_phone_id_ext__c
+    ppc.individual_id_ext__c = contact.individual_id_ext__c
+    ppc.capture_contact_point_id_ext__c = cont_point.contact_point_phone_id_ext__c
+    # TODO Fields belwo are not required for phone this is just for testing
+    ppc.authorization_form_id_ext__c = stage_contact.authorization_form_sms_consent__c
+    ppc.data_use_purpose_id_ext__c = stage_contact.sms_data_use_purpose__c
 
     return ppc

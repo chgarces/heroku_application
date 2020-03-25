@@ -134,7 +134,7 @@ def add_objects_to_session(session, obj_list):
 
 
 # GENERIC
-def dml_records(session):
+def dml_submit_to_database(session):
     """-----------------------------------------------------------
     Description: Manage DML operation in the database
     Argument: db session
