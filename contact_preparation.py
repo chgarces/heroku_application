@@ -35,24 +35,27 @@ def validate_stage_contacts(session, stage_contacts):
     Argument: (1)list of stage contacts 
     Return: 
     -----------------------------------------------------------"""
-    req_validation_pass_list = validate_required_fields(stage_contacts)
-    email_validation_pass_list = []
-    mobile_validation_pass_list = []
-    if req_validation_pass_list:
-        email_validation_pass_list = validate_email_fields(req_validation_pass_list)
-    if email_validation_pass_list:
-        mobile_validation_pass_list = validate_mobile_fields(email_validation_pass_list)
-    if mobile_validation_pass_list:
-        dml_list_of_objects(
-            session,
-            update_stage_contact_status(
-                mobile_validation_pass_list, VALIDATION_COMPLETED, IN_PROGRESS
-            ),
-        )
+    validation_dictionary = {PASSED: [], FAILED: []}
+
+    validation_dictionary = validate_required_fields(
+        stage_contacts, validation_dictionary
+    )
+
+    print("CHECK DICT ::::: {}".format(validation_dictionary))
+    # validation_dictionary = validate_email_fields(
+    #     validation_dictionary.get(PASSED), validation_dictionary
+    # )
+
+    # print("CHECK HERE ::::: {}".format(validation_dictionary))
+
+    # if stage_contact_list:
+    #     dml_list_of_objects(
+    #         session, stage_contact_list,
+    #     )
 
 
 # REQUIRED FIELDS
-def validate_required_fields(stage_contacts):
+def validate_required_fields(stage_contacts, validation_dictionary):
     """-----------------------------------------------------------  
     Description:  validate required fields
     Argument: (1)list of stage contacts 
@@ -60,26 +63,17 @@ def validate_required_fields(stage_contacts):
     -----------------------------------------------------------"""
     print("CHECK validate_stage_contacts")
     rfv = dict()
-    req_validation_pass_list = []
-    req_validation_failed_list = []
     for sc in stage_contacts:
         rfv = required_field_validator(sc)
         if rfv.get(HAS_ERROR):
             sc.error_message__c = "REQUIRED FIELDS MISSING : {}".format(
                 ", ".join(rfv.get(ERROR_FIELDS))
             )
-            req_validation_failed_list.append(sc)
+            validation_dictionary.get(FAILED).append(sc)
         else:
-            req_validation_pass_list.append(sc)
+            validation_dictionary.get(PASSED).append(sc)
 
-    if req_validation_failed_list:
-        dml_list_of_objects(
-            session,
-            update_stage_contact_status(
-                req_validation_failed_list, REQUIRED_FIELDS, FAILED
-            ),
-        )
-    return req_validation_pass_list
+    return validation_dictionary
 
 
 # REQUIRED FIELDS
@@ -103,32 +97,20 @@ def required_field_validator(obj):
 
 
 # REQUIRED FIELDS
-def validate_email_fields(stage_contacts):
+def validate_email_fields(stage_contacts, validation_dictionary):
     """-----------------------------------------------------------  
     Description: if changed email is true old_email is required
     Argument: (1)session (2)list of stage contacts
     Return: 
     -----------------------------------------------------------"""
-    print("CHECK validate_email_fields")
-    email_validation_pass_list = []
-    email_validation_failed_list = []
+    print("CHECK validate_email_fields {}".format(stage_contacts))
     for sc in stage_contacts:
-        sc.process_status__c = "EMAIL VALIDATION"
         if sc.change_email__c == True and is_empty(sc.old_email__c):
-            sc.status__c = FAILED
             sc.error_message__c = "REQUIRED FIELDS MISSING : old_email__c"
-            email_validation_failed_list.append(sc)
-        email_validation_pass_list.append(sc)
+            validation_dictionary.get(FAILED).append(sc)
+        validation_dictionary.get(PASSED).append(sc)
 
-    if email_validation_failed_list:
-        dml_list_of_objects(
-            session,
-            update_stage_contact_status(
-                email_validation_failed_list, EMAIL_VALIDATION, FAILED
-            ),
-        )
-
-    return email_validation_pass_list
+    return validation_dictionary
 
 
 # REQUIRED FIELDS
@@ -139,8 +121,7 @@ def validate_mobile_fields(stage_contacts):
     Return: 
     -----------------------------------------------------------"""
     print("CHECK validate_mobile_fields")
-    mobile_validation_pass_list = []
-    mobile_validation_failed_list = []
+    mobile_dictionary = {PASSED: [], FAILED: []}
     for sc in stage_contacts:
         if not is_empty(sc.mobile__c):
             if is_empty(sc.sms_consent_date__c):
@@ -149,17 +130,11 @@ def validate_mobile_fields(stage_contacts):
                 sc.error_message__c += " sms_data_use_purpose__c,"
             if not is_empty(sc.error_message__c):
                 sc.error_message__c = "REQUIRED FIELDS MISSING : " + sc.error_message__c
-                mobile_validation_failed_list.append(sc)
+                mobile_dictionary.get(FAILED).append(sc)
         else:
-            mobile_validation_pass_list.append(sc)
-    if mobile_validation_failed_list:
-        dml_list_of_objects(
-            session,
-            update_stage_contact_status(
-                mobile_validation_failed_list, MOBILE_VALIDATION, FAILED
-            ),
-        )
-    return mobile_validation_pass_list
+            mobile_dictionary.get(PASSED).append(sc)
+
+    return mobile_dictionary
 
 
 # ORG SOURCE UPDATE

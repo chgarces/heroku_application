@@ -192,7 +192,7 @@ def dml_list_of_objects(session, obj_list):
     Argument:(1)list of stage contacts
     Return: return a list of stage contacts
     -----------------------------------------------------------"""
-    print("CHECK update_stage_contact_status ")
+    print("CHECK dml_list_of_objects ")
 
     for obj in obj_list:
         session.add(obj)
