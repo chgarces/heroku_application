@@ -253,67 +253,101 @@ def manage_create_records(session, stage_contacts):
     -----------------------------------------------------------"""
     # print("CHECK manage_create_records")
     sc_dict = create_dictionary(stage_contacts)
+
     # Individual
     ind_list = create_individual(sc_dict)
     ind_dict = create_dictionary(ind_list)
-    add_objects_to_session(session, ind_list)
+    record_set_dictionary = build_record_sets_dictionary(ind_list, dict())
+
     # Contact
     cont_list = create_contact(sc_dict, ind_dict)
     cont_dict = create_dictionary_list(cont_list)
-    add_objects_to_session(session, cont_list)
+    record_set_dictionary = build_record_sets_dictionary(
+        cont_list, record_set_dictionary
+    )
+
     # ContactSource
     cont_source_list = create_contact_source(sc_dict, cont_dict)
-    add_objects_to_session(session, cont_source_list)
+    record_set_dictionary = build_record_sets_dictionary(
+        cont_source_list, record_set_dictionary
+    )
+
     # ContactIdentifier
     cont_identifier_list = create_contact_identifier(sc_dict, cont_dict)
-    add_objects_to_session(session, cont_identifier_list)
+    record_set_dictionary = build_record_sets_dictionary(
+        cont_identifier_list, record_set_dictionary
+    )
+
     # ContactSourceIdentifier
     contact_source_dict = contact_source_dictionary(cont_source_list)
     contact_identifier_dict = contact_identifier_dictionary(cont_identifier_list)
     cont_sou_ident_list = create_contact_source_identifier(
         contact_source_dict, contact_identifier_dict
     )
-    add_objects_to_session(session, cont_sou_ident_list)
+    record_set_dictionary = build_record_sets_dictionary(
+        cont_sou_ident_list, record_set_dictionary
+    )
+
     # ContactPoint EMAIL
     cont_id_dict = contact_dictionary(cont_list)
     email_cont_ident_list = filter_contact_identifier(cont_identifier_list, EMAIL)
     cont_point_email_list = create_contact_point_email(
         email_cont_ident_list, sc_dict, cont_id_dict
     )
-    add_objects_to_session(session, cont_point_email_list)
+    record_set_dictionary = build_record_sets_dictionary(
+        cont_point_email_list, record_set_dictionary
+    )
+
     # ContactPoint MOBILE
     mobile_cont_ident_list = filter_contact_identifier(cont_identifier_list, MOBILE)
     cont_point_mobile_list = create_contact_point_mobile(
         mobile_cont_ident_list, sc_dict, cont_id_dict
     )
-    add_objects_to_session(session, cont_point_mobile_list)
+    record_set_dictionary = build_record_sets_dictionary(
+        cont_point_mobile_list, record_set_dictionary
+    )
+
     # ContactPoints PHONE
     phone_cont_ident_list = filter_contact_identifier(cont_identifier_list, PHONE)
     cont_point_phone_list = create_contact_point_phone(
         phone_cont_ident_list, sc_dict, cont_id_dict
     )
-    add_objects_to_session(session, cont_point_phone_list)
+    record_set_dictionary = build_record_sets_dictionary(
+        cont_point_phone_list, record_set_dictionary
+    )
+
     # MOBILE CONSENT
     mobile_consent_list = create_contact_consent_mobile(
         cont_point_mobile_list, sc_dict, cont_id_dict
     )
-    add_objects_to_session(session, mobile_consent_list)
+    record_set_dictionary = build_record_sets_dictionary(
+        mobile_consent_list, record_set_dictionary
+    )
+
     # PHONE CONSENT
     phone_consent_list = create_contact_consent_phone(
         cont_point_phone_list, sc_dict, cont_id_dict
     )
-    add_objects_to_session(session, phone_consent_list)
+    record_set_dictionary = build_record_sets_dictionary(
+        phone_consent_list, record_set_dictionary
+    )
+
     # EMAIL CONSENT
     email_consent_list = create_contact_consent_email(
         cont_point_email_list, sc_dict, cont_id_dict
     )
-    add_objects_to_session(session, email_consent_list)
+    record_set_dictionary = build_record_sets_dictionary(
+        email_consent_list, record_set_dictionary
+    )
+    if record_set_dictionary:
+        # print("CHECK SET ::: {}".format(record_set_dictionary))
+        dml_submit_set_to_database(session, record_set_dictionary, sc_dict)
+    # if session.new:
+    #     dml_submit_to_database(session)
 
-    if session.new:
-        dml_submit_to_database(session)
-        # update StageContacts status
-        add_objects_to_session(session, update_stage_contacts(stage_contacts))
-        dml_submit_to_database(session)
+    # TODO update StageContacts status this need to go to the utility class
+    # add_objects_to_session(session, update_stage_contacts(stage_contacts))
+    # dml_submit_to_database(session)
 
 
 # TODO VALIDATE THE RECORD MAPPING AND CREATION
@@ -326,11 +360,9 @@ if __name__ == "__main__":
     query_limit = 100
     # CONTACT PREPARATION
     stage_contact_list = query_stage_contacts(
-        session,
-        query_limit,
-        process_status__c=["NOT STARTED"],
-        status__c=["NOT STARTED"],
+        session, query_limit, process_status__c=[NOT_STARTED], status__c=[NOT_STARTED],
     )
+
     if stage_contact_list.count() > 0:
         update_stage_contact_with_org_source(
             session,
@@ -339,44 +371,32 @@ if __name__ == "__main__":
                 query_organization_source(session, query_limit, is_active__c=[True])
             ),
         )
-        validate_required_fields(
-            session,
-            query_stage_contacts(
-                session,
-                query_limit,
-                process_status__c=["ORG SOURCE"],
-                status__c=["IN PROGRESS"],
-            ),
-        )
-        validate_email_fields(
-            session,
-            query_stage_contacts(
-                session,
-                query_limit,
-                process_status__c=["REQUIRED FIELDS"],
-                status__c=["IN PROGRESS"],
-            ),
-        )
-        validate_mobile_fields(
-            session,
-            query_stage_contacts(
-                session,
-                query_limit,
-                process_status__c=["EMAIL FIELDS"],
-                status__c=["IN PROGRESS"],
-            ),
+    else:
+        print("No stage records to update with organization source")
+
+    stage_contact_validate = query_stage_contacts(
+        session,
+        query_limit,
+        process_status__c=[CLIENT_TYPE_VALIDATION],
+        status__c=[IN_PROGRESS],
+    )
+    if stage_contact_validate.count() > 0:
+        validate_stage_contacts(
+            session, stage_contact_validate,
         )
     else:
-        print("No records to prepare at this time")
+        print("No stage records to validate")
 
     # CONTACT PROCESSING
+
     ready_stage_contact_list = query_stage_contacts(
         session,
         query_limit,
-        process_status__c=["MOBILE FIELDS"],
-        status__c=["IN PROGRESS"],
+        process_status__c=[MOBILE_VALIDATION],
+        status__c=[IN_PROGRESS],
         is_matched_completed=[True],
     )
+    # print("CHECK SESSION SIZE 2 : {}".format(ready_stage_contact_list.count()))
     if ready_stage_contact_list.count() > 0:
         manage_create_records(
             session, ready_stage_contact_list,
