@@ -238,38 +238,38 @@ def organization_source_dictionary(organization_sources):
     return org_dict
 
 
-# MAIN
-if __name__ == "__main__":
-    session = loadSession()
-    # DEBUG
+# # MAIN
+# if __name__ == "__main__":
+#     session = loadSession()
+#     # DEBUG
 
-    # SEQUENCE
-    query_limit = 100
-    # CONTACT PREPARATION
-    stage_contact_list = query_stage_contacts(
-        session, query_limit, process_status__c=[NOT_STARTED], status__c=[NOT_STARTED],
-    )
+#     # SEQUENCE
+#     query_limit = 100
+#     # CONTACT PREPARATION
+#     stage_contact_list = query_stage_contacts(
+#         session, query_limit, process_status__c=[NOT_STARTED], status__c=[NOT_STARTED],
+#     )
 
-    if stage_contact_list.count() > 0:
-        update_stage_contact_with_org_source(
-            session,
-            stage_contact_list,
-            organization_source_dictionary(
-                query_organization_source(session, query_limit, is_active__c=[True])
-            ),
-        )
-    else:
-        print("No stage records to update with organization source")
+#     if stage_contact_list.count() > 0:
+#         update_stage_contact_with_org_source(
+#             session,
+#             stage_contact_list,
+#             organization_source_dictionary(
+#                 query_organization_source(session, query_limit, is_active__c=[True])
+#             ),
+#         )
+#     else:
+#         print("No stage records to update with organization source")
 
-    stage_contact_validate = query_stage_contacts(
-        session,
-        query_limit,
-        process_status__c=[CLIENT_TYPE_VALIDATION],
-        status__c=[IN_PROGRESS],
-    )
-    if stage_contact_validate.count() > 0:
-        validate_stage_contacts(
-            session, stage_contact_validate,
-        )
-    else:
-        print("No stage records to validate")
+#     stage_contact_validate = query_stage_contacts(
+#         session,
+#         query_limit,
+#         process_status__c=[CLIENT_TYPE_VALIDATION],
+#         status__c=[IN_PROGRESS],
+#     )
+#     if stage_contact_validate.count() > 0:
+#         validate_stage_contacts(
+#             session, stage_contact_validate,
+#         )
+#     else:
+#         print("No stage records to validate")

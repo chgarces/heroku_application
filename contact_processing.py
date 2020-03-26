@@ -340,14 +340,7 @@ def manage_create_records(session, stage_contacts):
         email_consent_list, record_set_dictionary
     )
     if record_set_dictionary:
-        # print("CHECK SET ::: {}".format(record_set_dictionary))
         dml_submit_set_to_database(session, record_set_dictionary, sc_dict)
-    # if session.new:
-    #     dml_submit_to_database(session)
-
-    # TODO update StageContacts status this need to go to the utility class
-    # add_objects_to_session(session, update_stage_contacts(stage_contacts))
-    # dml_submit_to_database(session)
 
 
 # TODO VALIDATE THE RECORD MAPPING AND CREATION
@@ -388,7 +381,6 @@ if __name__ == "__main__":
         print("No stage records to validate")
 
     # CONTACT PROCESSING
-
     ready_stage_contact_list = query_stage_contacts(
         session,
         query_limit,
@@ -396,7 +388,6 @@ if __name__ == "__main__":
         status__c=[IN_PROGRESS],
         is_matched_completed=[True],
     )
-    # print("CHECK SESSION SIZE 2 : {}".format(ready_stage_contact_list.count()))
     if ready_stage_contact_list.count() > 0:
         manage_create_records(
             session, ready_stage_contact_list,

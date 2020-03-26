@@ -145,27 +145,30 @@ def dml_submit_set_to_database(session, record_set_dictionary, sc_dict):
     Return: 
     -----------------------------------------------------------"""
     print("CHECK dml_submit_to_database")
+    print("CHECK record_set_dictionary :::: {}".format(len(record_set_dictionary)))
     # TODO update stage contact with error message in case of error
-    stage_contact_list = []
+    stage_contact_passed_list = []
+    stage_contact_failed_list = []
     for scid in record_set_dictionary.keys():
         for obj in record_set_dictionary.get(scid):
             session.add(obj)
         try:
             session.commit()
-            sc_dict.get(scid).process_status__c = POSTGRES_COMPLETED
-            sc_dict.get(scid).status__c = IN_PROGRESS
-            stage_contact_list.append(sc_dict.get(scid))
+            stage_contact_passed_list.append(sc_dict.get(scid))
         # TODO: CATCH ERRORS
         except exc.SQLAlchemyError as e:
-            logging.exception(e)
-            print("THERE WAS AN ERROR WHILE CREATING SET OF RECORDS ")
             session.rollback()
-            sc_dict.get(scid).process_status__c = POSTGRES_FAILED
-            sc_dict.get(scid).status__c = FAILED
-            stage_contact_list.append(sc_dict.get(scid))
+            print("THERE WAS AN ERROR WHILE CREATING SET OF RECORDS")
+            stage_contact_failed_list.append(sc_dict.get(scid))
 
-    if len(stage_contact_list) > 0:
-        dml_list_of_objects(session, stage_contact_list)
+    for sc in stage_contact_passed_list:
+        sc.status__c = IN_PROGRESS
+        sc.process_status__c = POSTGRES_COMPLETED
+    for sc in stage_contact_failed_list:
+        sc.status__c = FAILED
+        sc.process_status__c = POSTGRES_FAILED
+
+    dml_list_of_objects(session, stage_contact_passed_list + stage_contact_failed_list)
 
 
 # GENERIC
@@ -182,6 +185,7 @@ def dml_list_of_objects(session, obj_list):
     try:
         session.commit()
     except Exception as e:
+        session.rollback()
         print("THERE WAS AN ERROR WHILE UPDATING STAGE CONTACTS")
     finally:
         session.close()
