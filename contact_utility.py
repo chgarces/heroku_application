@@ -1,5 +1,6 @@
 from uuid import uuid4
 from sqlalchemy import exc
+from contact_variables import *
 
 #
 # APP REQUIRED FIELDS
@@ -144,45 +145,24 @@ def dml_submit_set_to_database(session, record_set_dictionary, sc_dict):
     -----------------------------------------------------------"""
     print("CHECK dml_submit_to_database")
     # TODO update stage contact with error message in case of error
-    stage_contact_failed_list = []
-    stage_contact_passed_list = []
+    stage_contact_list = []
     for scid in record_set_dictionary.keys():
         for obj in record_set_dictionary.get(scid):
             session.add(obj)
         try:
             session.commit()
-            stage_contact_passed_list.append(
-                sc_dict.get(scid), "POSTGRES COMPLETED", "IN PROGRESS"
-            )
+            sc_dict.get(scid).process_status__c = POSTGRES_COMPLETED
+            sc_dict.get(scid).status__c = IN_PROGRESS
+            stage_contact_list.append(sc_dict.get(scid))
         # TODO: CATCH ERRORS
         except exc.SQLAlchemyError as e:
             print("THERE WAS AN ERROR WHILE CREATING SET OF RECORDS ")
-            session.rollback()
-            stage_contact_failed_list.append(
-                sc_dict.get(scid), "POSTGRES FAILED", "FAILED"
-            )
+            sc_dict.get(scid).process_status__c = POSTGRES_FAILED
+            sc_dict.get(scid).status__c = FAILED
+            stage_contact_list.append(sc_dict.get(scid))
 
-    if stage_contact_failed_list:
-        dml_list_of_objects(session, stage_contact_failed_list)
-    if stage_contact_passed_list:
-        dml_list_of_objects(session, stage_contact_passed_list)
-
-
-# CREATE ALL RECORDS
-def update_stage_contact_status(stage_contacts, process_status, status):
-    """-----------------------------------------------------------
-    Description: Will update the stage contacs status after the related record are created
-    Argument:(1)list of stage contacts
-    Return: return stage contact obj
-    -----------------------------------------------------------"""
-    print("CHECK update_stage_contact_status ")
-    stage_contacts_list = []
-    for sc in stage_contacts:
-        sc.process_status__c = process_status
-        sc.status__c = status
-        stage_contacts_list.append(sc)
-
-    return stage_contacts_list
+    if len(stage_contact_list) > 0:
+        dml_list_of_objects(session, stage_contact_list)
 
 
 # GENERIC

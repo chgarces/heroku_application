@@ -32,48 +32,52 @@ def object_as_dict(obj):
 def validate_stage_contacts(session, stage_contacts):
     """-----------------------------------------------------------  
     Description: Manage the validation functions
-    Argument: (1)list of stage contacts 
+    Argument: (1)session (2)list of stage contacts 
     Return: 
     -----------------------------------------------------------"""
-    validation_dictionary = {PASSED: [], FAILED: []}
+    stage_contact_list = []
+    req_dictionary = validate_required_fields(stage_contacts)
+    email_dictionary = validate_required_fields(req_dictionary.get(PASSED))
+    mobile_dictionary = validate_mobile_fields(email_dictionary.get(PASSED))
 
-    validation_dictionary = validate_required_fields(
-        stage_contacts, validation_dictionary
+    stage_contact_list = (
+        req_dictionary.get(FAILED)
+        + email_dictionary.get(FAILED)
+        + mobile_dictionary.get(FAILED)
+        + mobile_dictionary.get(PASSED)
     )
 
-    print("CHECK DICT ::::: {}".format(validation_dictionary))
-    # validation_dictionary = validate_email_fields(
-    #     validation_dictionary.get(PASSED), validation_dictionary
-    # )
-
-    # print("CHECK HERE ::::: {}".format(validation_dictionary))
-
-    # if stage_contact_list:
-    #     dml_list_of_objects(
-    #         session, stage_contact_list,
-    #     )
+    if len(stage_contact_list) > 0:
+        dml_list_of_objects(
+            session, stage_contact_list,
+        )
 
 
 # REQUIRED FIELDS
-def validate_required_fields(stage_contacts, validation_dictionary):
+def validate_required_fields(stage_contacts):
     """-----------------------------------------------------------  
     Description:  validate required fields
     Argument: (1)list of stage contacts 
     Return: 
     -----------------------------------------------------------"""
-    print("CHECK validate_stage_contacts")
+    # print("CHECK validate_stage_contacts")
     rfv = dict()
+    req_dictionary = {PASSED: [], FAILED: []}
     for sc in stage_contacts:
         rfv = required_field_validator(sc)
+        sc.process_status__c = REQUIRED_FIELD_VALIDATION
         if rfv.get(HAS_ERROR):
+            sc.status__c = FAILED
             sc.error_message__c = "REQUIRED FIELDS MISSING : {}".format(
                 ", ".join(rfv.get(ERROR_FIELDS))
             )
-            validation_dictionary.get(FAILED).append(sc)
+            req_dictionary.get(FAILED).append(sc)
         else:
-            validation_dictionary.get(PASSED).append(sc)
+            sc.status__c = IN_PROGRESS
+            sc.error_message__c = None
+            req_dictionary.get(PASSED).append(sc)
 
-    return validation_dictionary
+    return req_dictionary
 
 
 # REQUIRED FIELDS
@@ -97,20 +101,25 @@ def required_field_validator(obj):
 
 
 # REQUIRED FIELDS
-def validate_email_fields(stage_contacts, validation_dictionary):
+def validate_email_fields(stage_contacts):
     """-----------------------------------------------------------  
     Description: if changed email is true old_email is required
     Argument: (1)session (2)list of stage contacts
     Return: 
     -----------------------------------------------------------"""
-    print("CHECK validate_email_fields {}".format(stage_contacts))
+    # print("CHECK validate_email_fields")
+    email_dictionary = {PASSED: [], FAILED: []}
     for sc in stage_contacts:
+        sc.process_status__c = EMAIL_VALIDATION
         if sc.change_email__c == True and is_empty(sc.old_email__c):
+            sc.status__c = FAILED
             sc.error_message__c = "REQUIRED FIELDS MISSING : old_email__c"
-            validation_dictionary.get(FAILED).append(sc)
-        validation_dictionary.get(PASSED).append(sc)
+            email_dictionary.get(FAILED).append(sc)
+        sc.status__c = IN_PROGRESS
+        sc.error_message__c = None
+        email_dictionary.get(PASSED).append(sc)
 
-    return validation_dictionary
+    return email_dictionary
 
 
 # REQUIRED FIELDS
@@ -120,18 +129,25 @@ def validate_mobile_fields(stage_contacts):
     Argument: (1)session (2)list of stage contacts
     Return: 
     -----------------------------------------------------------"""
-    print("CHECK validate_mobile_fields")
+    # print("CHECK validate_mobile_fields")
     mobile_dictionary = {PASSED: [], FAILED: []}
     for sc in stage_contacts:
+        sc.process_status__c = MOBILE_VALIDATION
         if not is_empty(sc.mobile__c):
             if is_empty(sc.sms_consent_date__c):
                 sc.error_message__c = " sms_consent_date__c,"
             if is_empty(sc.sms_data_use_purpose__c):
-                sc.error_message__c += " sms_data_use_purpose__c,"
+                if is_empty(sc.error_message__c):
+                    sc.error_message__c = " sms_data_use_purpose__c,"
+                else:
+                    sc.error_message__c += " sms_data_use_purpose__c,"
             if not is_empty(sc.error_message__c):
                 sc.error_message__c = "REQUIRED FIELDS MISSING : " + sc.error_message__c
+                sc.status__c = FAILED
                 mobile_dictionary.get(FAILED).append(sc)
         else:
+            sc.status__c = IN_PROGRESS
+            sc.error_message__c = None
             mobile_dictionary.get(PASSED).append(sc)
 
     return mobile_dictionary
@@ -144,32 +160,21 @@ def update_stage_contact_with_org_source(session, stage_contacts, org_dict):
     Argument: (1)session (2)list of stage contacts (3)org source dictionary
     Return: 
     -----------------------------------------------------------"""
-    print("CHECK update_stage_contact_with_org_source")
+    # print("CHECK update_stage_contact_with_org_source")
     stage_contact_list = []
-    stage_contact_failed_list = []
     for sc in stage_contacts:
+        sc.process_status__c = CLIENT_TYPE_VALIDATION
         if sc.client_id__c in org_dict.keys():
+            sc.status__c = IN_PROGRESS
             stage_contact_list.append(
                 organization_source(sc, org_dict.get(sc.client_id__c))
             )
         else:
+            sc.status__c = FAILED
             sc.error_message__c = CLIENT_DOES_NOT_EXIST
-            stage_contact_failed_list.append(sc)
+            stage_contact_list.append(sc)
 
-    if stage_contact_list:
-        dml_list_of_objects(
-            session,
-            update_stage_contact_status(
-                stage_contact_list, CLIENT_TYPE_VALIDATION, IN_PROGRESS
-            ),
-        )
-    if stage_contact_failed_list:
-        dml_list_of_objects(
-            session,
-            update_stage_contact_status(
-                stage_contact_failed_list, CLIENT_TYPE_VALIDATION, FAILED
-            ),
-        )
+    dml_list_of_objects(session, stage_contact_list)
 
 
 # ORG SOURCE UPDATE
