@@ -28,17 +28,11 @@ def organization_source(stage_contact, org_source):
     stage_contact.is_obfuscated__c = org_source.is_obfuscated__c
     stage_contact.is_salesforce_org__c = org_source.is_salesforce_org__c
     stage_contact.is_separate_contact__c = org_source.is_separate_contact__c
-    # stage_contact.process_status__c = ORG_SOURCE
     stage_contact.source_contact_record_type_id__c = (
         org_source.source_contact_record_type_id__c
     )
     stage_contact.generic_record_type_id__c = org_source.generic_record_type_id__c
     stage_contact.source_name__c = org_source.source_name__c
-    # stage_contact.status__c = IN_PROGRESS
-    # else:
-    #     stage_contact.process_status__c = ORG_SOURCE
-    #     stage_contact.status__c = FAILED
-    #     stage_contact.error_message__c = CLIENT_DOES_NOT_EXIST
 
     return stage_contact
 
