@@ -360,12 +360,9 @@ if __name__ == "__main__":
     query_limit = 100
     # CONTACT PREPARATION
     stage_contact_list = query_stage_contacts(
-        session,
-        query_limit,
-        process_status__c=["NOT STARTED"],
-        status__c=["NOT STARTED"],
+        session, query_limit, process_status__c=[NOT_STARTED], status__c=[NOT_STARTED],
     )
-    print("CHECK SESSION SIZE 1 : {}".format(stage_contact_list.count()))
+
     if stage_contact_list.count() > 0:
         update_stage_contact_with_org_source(
             session,
@@ -374,46 +371,32 @@ if __name__ == "__main__":
                 query_organization_source(session, query_limit, is_active__c=[True])
             ),
         )
-        validate_required_fields(
-            session,
-            query_stage_contacts(
-                session,
-                query_limit,
-                process_status__c=["ORG SOURCE"],
-                status__c=["IN PROGRESS"],
-            ),
-        )
-        validate_email_fields(
-            session,
-            query_stage_contacts(
-                session,
-                query_limit,
-                process_status__c=["REQUIRED FIELDS"],
-                status__c=["IN PROGRESS"],
-            ),
-        )
-        validate_mobile_fields(
-            session,
-            query_stage_contacts(
-                session,
-                query_limit,
-                process_status__c=["EMAIL FIELDS"],
-                status__c=["IN PROGRESS"],
-            ),
+    else:
+        print("No stage records to update with organization source")
+
+    stage_contact_validate = query_stage_contacts(
+        session,
+        query_limit,
+        process_status__c=[CLIENT_TYPE_VALIDATION],
+        status__c=[IN_PROGRESS],
+    )
+    if stage_contact_validate.count() > 0:
+        validate_stage_contacts(
+            session, stage_contact_validate,
         )
     else:
-        print("No records to prepare at this time")
+        print("No stage records to validate")
 
     # CONTACT PROCESSING
 
     ready_stage_contact_list = query_stage_contacts(
         session,
         query_limit,
-        process_status__c=["MOBILE FIELDS"],
-        status__c=["IN PROGRESS"],
+        process_status__c=[MOBILE_VALIDATION],
+        status__c=[IN_PROGRESS],
         is_matched_completed=[True],
     )
-    print("CHECK SESSION SIZE 2 : {}".format(ready_stage_contact_list.count()))
+    # print("CHECK SESSION SIZE 2 : {}".format(ready_stage_contact_list.count()))
     if ready_stage_contact_list.count() > 0:
         manage_create_records(
             session, ready_stage_contact_list,

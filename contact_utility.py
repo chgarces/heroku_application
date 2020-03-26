@@ -1,6 +1,7 @@
 from uuid import uuid4
 from sqlalchemy import exc
 from contact_variables import *
+import logging
 
 #
 # APP REQUIRED FIELDS
@@ -156,7 +157,9 @@ def dml_submit_set_to_database(session, record_set_dictionary, sc_dict):
             stage_contact_list.append(sc_dict.get(scid))
         # TODO: CATCH ERRORS
         except exc.SQLAlchemyError as e:
+            logging.exception(e)
             print("THERE WAS AN ERROR WHILE CREATING SET OF RECORDS ")
+            session.rollback()
             sc_dict.get(scid).process_status__c = POSTGRES_FAILED
             sc_dict.get(scid).status__c = FAILED
             stage_contact_list.append(sc_dict.get(scid))
