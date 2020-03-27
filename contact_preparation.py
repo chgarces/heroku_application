@@ -1,7 +1,7 @@
-from .contact_model_engine import *
-from .contact_utility import *
-from .contact_variables import *
-from .contact_mapper import *
+from contact_model_engine import *
+from contact_utility import *
+from contact_variables import *
+from contact_mapper import *
 
 #
 # REQUIRED FIELDS
