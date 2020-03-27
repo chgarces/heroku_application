@@ -1,4 +1,4 @@
-from .contact_preparation import *
+from contact_preparation import *
 from contact_mapper import *
 
 # CREATION INDIVIDUAL
